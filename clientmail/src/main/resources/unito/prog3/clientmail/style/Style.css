@@ -1,0 +1,343 @@
+.root {
+    -fx-font-family: "SF UI Text";
+    -fx-font-size: 10px;
+}
+
+.main {
+}
+
+/* Login / Signup */
+
+.login-outer,
+.signup-outer {
+    -fx-background-color: linear-gradient(to bottom right, rgba(243, 245, 246, 1) 0%, rgba(207, 251, 255, 1) 100%);
+}
+
+.sign-up-ask,
+.log-in-ask {
+    -fx-text-fill: #495057;
+}
+
+.sign-up-btn,
+.log-in-btn {
+}
+
+.login-form-wrap,
+.signup-form-wrap {
+    -fx-border-color: #d6d6d6;
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 15;
+    -fx-border-radius: 15;
+}
+
+.login-wrong-input {
+    -fx-text-fill: red;
+    -fx-font-weight: bold;
+}
+
+.login-form-item,
+.signup-form-item {
+    -fx-border-width: 2px;
+    -fx-border-style: hidden hidden solid hidden;
+}
+
+.login-form-psw-field {
+    -fx-border-style: solid hidden;
+    -fx-border-color: #d6d6d6;
+}
+
+.signup-form-usr-field {
+    -fx-border-style: hidden hidden solid hidden;
+    -fx-border-color: #d6d6d6;
+}
+
+.login-head-title,
+.signup-head-title {
+    -fx-font-size: 2em;
+}
+
+.login-form-input,
+.signup-form-input {
+    -fx-prompt-text-fill: rgba(118, 118, 123, 0.6);
+    -fx-font-size: 2em;
+    -fx-background-color: #FFFFFF;
+    -fx-text-box-border: hidden;
+    -fx-background-radius: 15;
+    -fx-background-insets: 0;
+}
+
+.login-form-btn-wrap,
+.sign-up-form-submit-wrap {
+    -fx-border-style: hidden hidden hidden hidden;
+}
+
+.loader {
+    -fx-border-width: 3px;
+    -fx-border-color: black;
+    -fx-border-radius: 50%;
+    -fx-border-style: solid hidden hidden hidden;
+}
+
+.wrong-input {
+    -fx-text-fill: rgba(206, 50, 71, 0.8);
+    -fx-alignment: center;
+}
+
+/* TopBar */
+
+.window-head {
+    -fx-background-color: #b4b4b6;
+    -fx-padding: 0 10;
+}
+
+.head-username {
+    -fx-font-size: 2em;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0071EB;
+}
+
+/* Folders Section */
+
+.folders-section-wrap {
+}
+
+.folders-section {
+    -fx-padding: 10;
+}
+
+.folders-section-title {
+    -fx-font-size: 2.4em;
+    -fx-font-weight: bold;
+}
+
+.folders-section-folderlist {
+}
+
+.folder_item {
+    -fx-background-color: #E4E4E6;
+    -fx-background-radius: 10;
+    -fx-padding: 0 10;
+    -fx-font-size: 1.4em;
+    -fx-font-weight: bold;
+}
+
+.custom-folders-label {
+    -fx-opacity: .5;
+}
+
+/* Main Content */
+
+.main-content {
+}
+
+/* Side Section */
+
+.side-section {
+    -fx-padding: 10;
+}
+
+.selected-folder-title {
+    -fx-font-size: 2.4em;
+    -fx-font-weight: bold;
+}
+
+.selected-mail-list-n {
+    -fx-font-size: 1.3em;
+    -fx-font-weight: bold;
+    -fx-text-fill: #76767b;
+}
+
+.selected-mail-list-wrap {
+    -fx-background-color: transparent;
+}
+
+/* MailBox List */
+
+.mailbox-list-item {
+    -fx-min-height: 100;
+    -fx-background-radius: 10;
+    -fx-padding: 5 0;
+    -fx-max-height: 90;
+    -fx-alignment: center-left;
+    -fx-border-style: hidden hidden solid hidden;
+    -fx-border-color: #b4b4b6;
+    -fx-cursor: hand;
+    -fx-spacing: 2;
+}
+
+.mailbox-list-item-source {
+    -fx-font-size: 1.6em;
+    -fx-font-weight: bold;
+}
+
+.mailbox-list-item-title {
+    -fx-font-size: 1.3em;
+    -fx-font-weight: bold;
+    -fx-opacity: 0.8;
+}
+
+.mailbox-list-item-content-preview {
+    -fx-opacity: 0.6;
+    -fx-font-size: 11px;
+    -fx-wrap-text: true;
+    -fx-text-overrun: ellipsis;
+    -fx-max-height: 60;
+    -fx-line-spacing: 3;
+    -fx-text-alignment: justify;
+}
+
+.mailbox-list-item-cm {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 10;
+    -fx-font-size: 1.2em;
+}
+
+.mailbox-list-item-menu {
+    -fx-padding: 5 40;
+    -fx-cursor: hand;
+    -fx-border-style: hidden hidden solid hidden;
+    -fx-border-color: #E4E4E6;
+}
+
+.mailbox-list-item-menu:focused {
+    -fx-background-color: #E4E4E6;
+}
+
+.mailbox-list-item-menu .label {
+    -fx-text-fill: black;
+    -fx-font-family: "SF UI Text";
+}
+
+.mailbox-list-item-last {
+    -fx-border-style: hidden;
+}
+
+.empty-msg-list {
+    -fx-padding: 10 0;
+}
+
+.empty-msg-list-description {
+    -fx-font-size: 1.4em;
+    -fx-font-weight: bold;
+    -fx-text-fill: #a0a0a4;
+}
+
+/* Selected Mail */
+
+.mail-content-outer {
+}
+
+.mail-content-wrap {
+}
+
+.mail-content {
+    -fx-background-radius: 10;
+    -fx-background-color: #f4f4f4;
+    -fx-padding: 0 15;
+    -fx-font-size: 1.4em;
+}
+
+.mail-content-outer {
+    -fx-padding: 10;
+}
+
+.mail-head {
+    -fx-border-style: hidden hidden solid hidden;
+    -fx-border-color: #F8F9FA;
+    -fx-border-width: .5px;
+}
+
+.mail-head-sender-icon {
+    -fx-border-color: white;
+    -fx-padding: 7 10;
+    -fx-border-radius: 50%;
+    -fx-text-fill: #F8F9FA;
+    -fx-background-color: #a0a0a4;
+    -fx-background-radius: 50%;
+    -fx-border-width: 2px;
+    -fx-font-size: 1.6em;
+}
+
+.mail-content-title {
+    -fx-font-size: 1.4em;
+    -fx-font-weight: bold;
+}
+
+.mail-content-to {
+}
+
+.mail-content-date {
+    -fx-opacity: 0.5;
+}
+
+.mail-description {
+}
+
+.mail-description-wrap {
+    -fx-background-color: #f4f4f4;
+}
+
+/* New Mail */
+
+.new-mail-outer {
+    -fx-background-color: rgba(33, 37, 41, 0.7);
+}
+
+.new-mail-wrap {
+    -fx-background-radius: 10;
+    -fx-background-color: #FFFFFF;
+    -fx-padding: 15;
+}
+
+.new-mail-undo {
+    -fx-font-size: 1.3em;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0071EB;
+    -fx-cursor: hand;
+}
+
+.new-mail-nm {
+    -fx-font-size: 2em;
+    -fx-font-weight: bold;
+}
+
+.new-mail-dataitem {
+    -fx-border-style: hidden hidden solid hidden;
+    -fx-border-color: rgba(118, 118, 123, 0.2);
+}
+
+.new-mail-datalabel {
+    -fx-font-weight: bold;
+    -fx-text-fill: #76767B;
+    -fx-font-size: 1.2em;
+}
+
+.new-mail-datafield {
+    -fx-text-box-border: transparent;
+    -fx-background-color: #FFFFFF;
+    -fx-font-size: 1.2em;
+}
+
+.new-msg-send-btn {
+    -fx-cursor: default;
+}
+
+.can-send {
+    -fx-cursor: hand !important;
+}
+
+.new-mail-content {
+    -fx-text-box-border: transparent;
+    -fx-background-color: #FFFFFF;
+    -fx-font-size: 1.4em;
+}
+
+.new-mail-content .content {
+    -fx-background-color: #FFFFFF;
+    -fx-padding: 5;
+}
+
+.new-mail-wrong-to {
+    -fx-text-fill: red;
+}
+

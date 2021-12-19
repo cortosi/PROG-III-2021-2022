@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.String?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.paint.Color?>
+
+<AnchorPane fx:id="main_window" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="726.0" prefWidth="1165.0" styleClass="main" stylesheets="@../style/Style.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="unito.prog3.controllers.Controller">
+    <children>
+        <BorderPane fx:id="main" layoutX="10.0" layoutY="10.0" prefHeight="726.0" prefWidth="1165.0" styleClass="main" stylesheets="@../style/Style.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <center>
+                <BorderPane fx:id="main_content" prefHeight="500.0" prefWidth="679.0" styleClass="main-content" stylesheets="@../style/Style.css" BorderPane.alignment="CENTER">
+                    <left>
+                        <VBox fx:id="side_section_mails" maxWidth="244.0" prefHeight="726.0" prefWidth="244.0" styleClass="side-section" stylesheets="@../style/Style.css" BorderPane.alignment="CENTER">
+                            <children>
+                                <AnchorPane prefHeight="71.0" prefWidth="200.0" styleClass="side-section-head" stylesheets="@../style/Style.css">
+                                    <children>
+                                        <Label fx:id="show_folders_btn" layoutY="2.0" onMouseClicked="#show_folders" prefHeight="25.0" prefWidth="62.0" styleClass="folders-btn" stylesheets="@../style/Style.css" text="&lt; Folders" visible="false" AnchorPane.bottomAnchor="47.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="118.0" AnchorPane.topAnchor="0.0">
+                                            <cursor>
+                                                <Cursor fx:constant="HAND" />
+                                            </cursor>
+                                        </Label>
+                                        <Label layoutX="-2.0" layoutY="44.0" styleClass="selected-folder-title" stylesheets="@../style/Style.css" text="Inbox" />
+                                    </children>
+                                </AnchorPane>
+                                <Label fx:id="selected_msg_n" styleClass="selected-mail-list-n" text="" />
+                                <ScrollPane fitToWidth="true" hbarPolicy="NEVER" prefHeight="597.0" prefWidth="224.0" styleClass="selected-mail-list-wrap" stylesheets="@../style/Style.css" vbarPolicy="NEVER">
+                                    <content>
+                                        <VBox fx:id="selected_mail_list" prefHeight="563.0" prefWidth="222.0" spacing="8.0" styleClass="selected-mail-list" stylesheets="@../style/Style.css">
+                                            <children>
+                                                <StackPane fx:id="empty_msg_list" alignment="TOP_CENTER" prefHeight="575.0" prefWidth="222.0" styleClass="empty-msg-list" visible="false">
+                                                    <children>
+                                                        <Label styleClass="empty-msg-list-description" text="There is no messages" />
+                                                    </children>
+                                                </StackPane>
+                                            </children>
+                                        </VBox>
+                                    </content>
+                                </ScrollPane>
+                            </children>
+                        </VBox>
+                    </left>
+                    <center>
+                        <VBox prefHeight="500.0" prefWidth="460.0" styleClass="test" stylesheets="@../style/Style.css" BorderPane.alignment="CENTER">
+                            <children>
+                                <HBox alignment="CENTER_RIGHT" prefHeight="44.0" prefWidth="501.0" styleClass="main-content-head" stylesheets="@../style/Style.css">
+                                    <children>
+                                        <ImageView fx:id="junk_btn" fitHeight="33.0" fitWidth="42.0" pickOnBounds="true" preserveRatio="true" HBox.hgrow="ALWAYS">
+                                            <image>
+                                                <Image url="@../imgs/trash.png" />
+                                            </image>
+                                            <cursor>
+                                                <Cursor fx:constant="HAND" />
+                                            </cursor>
+                                        </ImageView>
+                                        <ImageView fx:id="junk_btn1" fitHeight="33.0" fitWidth="42.0" pickOnBounds="true" preserveRatio="true">
+                                            <image>
+                                                <Image url="@../imgs/reply.png" />
+                                            </image>
+                                            <cursor>
+                                                <Cursor fx:constant="HAND" />
+                                            </cursor>
+                                        </ImageView>
+                                    </children>
+                                </HBox>
+                                <AnchorPane prefHeight="464.0" prefWidth="460.0" styleClass="mail-content-outer" stylesheets="@../style/Style.css" VBox.vgrow="ALWAYS">
+                                    <children>
+                                        <AnchorPane layoutX="130.0" layoutY="130.0" prefHeight="200.0" prefWidth="200.0" styleClass="mail-content" stylesheets="@../style/Style.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                            <children>
+                                                <HBox alignment="CENTER_LEFT" prefHeight="69.0" prefWidth="435.0" spacing="10.0" styleClass="mail-head" stylesheets="@../style/Style.css" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                    <children>
+                                                        <Label alignment="CENTER" prefHeight="50.0" prefWidth="50.0" styleClass="mail-head-sender-icon" stylesheets="@../style/Style.css" text="A" textOverrun="CLIP">
+                                                            <cursor>
+                                                                <Cursor fx:constant="HAND" />
+                                                            </cursor>
+                                                        </Label>
+                                                        <VBox alignment="CENTER_LEFT" prefHeight="69.0" prefWidth="332.0" spacing="5.0" stylesheets="@../style/Style.css" HBox.hgrow="ALWAYS">
+                                                            <children>
+                                                                <Label styleClass="mail-content-title" stylesheets="@../style/Style.css" text="Crole" />
+                                                                <Label styleClass="mail-content-to" stylesheets="@../style/Style.css" text="To: " />
+                                                            </children>
+                                                        </VBox>
+                                                        <Label styleClass="mail-content-date" stylesheets="@../style/Style.css" text="Today" textOverrun="CLIP" />
+                                                    </children>
+                                                </HBox>
+                                                <Label layoutX="17.0" layoutY="77.0" prefHeight="55.0" prefWidth="674.0" styleClass="mail-content-title" stylesheets="@../style/Style.css" text="Lorem ipsum dolor sit amet. Aut laboriosam perspiciatis sed reprehenderit expedita" textOverrun="CLIP" wrapText="true" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="77.0" />
+                                                <VBox alignment="TOP_CENTER" layoutX="60.0" layoutY="121.0" prefHeight="536.0" prefWidth="633.0" styleClass="mail-description-outer" stylesheets="@../style/Style.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="45.0" AnchorPane.rightAnchor="45.0" AnchorPane.topAnchor="150.0">
+                                                    <children>
+                                                        <ScrollPane hbarPolicy="NEVER" maxWidth="600.0" prefHeight="583.0" prefWidth="600.0" styleClass="mail-description-wrap" stylesheets="@../style/Style.css" vbarPolicy="NEVER" VBox.vgrow="ALWAYS">
+                                                            <content>
+                                                                <Label lineSpacing="7.0" maxWidth="600.0" prefHeight="402.0" prefWidth="574.0" styleClass="mail-description" stylesheets="@../style/Style.css" text="Lorem ipsum dolor sit amet. Aut laboriosam perspiciatis sed reprehenderit expedita Quis assumenda. Et doloremque facilis est aliquid atque et quasi repellat et nobis consequuntur quo esse dolore qui excepturi molestias. Sed quod atque qui dolorem sequi 33 animi dolor a adipisci autem vel enim consequatur. Est deleniti rerum ut nobis molestiae sit cumque natus sed explicabo eveniet id molestiae vitae non commodi dolor. Sit architecto magnam est animi fuga in eaque eaque eos provident velit quo dolorem similique. In voluptas aperiam ut temporibus tempora aut odio ipsum quo corrupti cumque a adipisci dicta ea rerum quae eum aliquam adipisci. Cum corporis porro sit quidem voluptatem ad eligendi atque ad porro galisum sed voluptatem quisquam ut commodi quia qui exercitationem ullam. Est blanditiis dolorum qui accusamus molestias non quasi architecto eum quidem officiis? Qui placeat mollitia non assumenda quis a impedit tempora qui quod nihil. Et reiciendis officia sed placeat accusantium ut sapiente Quis et ipsam ratione sit ipsam voluptatem est sequi maxime 33 galisum reiciendis! Sed commodi labore qui dolore dolor hic magnam Quis et molestiae repudiandae.Qui possimus tenetur eum dolor laboriosam non impedit architecto qui asperiores iusto et aliquid nulla. Cum sint odio vel repudiandae dolorem vel minima numquam aut maxime doloremque rem dignissimos adipisci aut beatae rerum. Non nobis illum vel galisum ipsa et molestiae voluptatum id eligendi fugiat qui molestias voluptatem. Rem impedit rerum ab aperiam iste et ipsa possimus nam nihil numquam eum facilis natus aut autem aliquam id iure autem. Ab delectus voluptas id error suscipit qui iure voluptas non veritatis eveniet ad natus repellat eum possimus earum! Est iure labore et optio repellat ab blanditiis quos sed ipsa dolorem a officia dolore sed vitae dolores a possimus dicta. In quia reiciendis et dolorem voluptas vel cumque unde sit necessitatibus vitae aut molestias eos aperiam facilis et velit soluta. Aut ipsum velit sed aperiam ratione ut blanditiis voluptas sit magnam debitis. Aut consectetur nesciunt qui maxime et dolorem quam est iste tempore non dolorem iste. Est incidunt atque qui ipsam sint ab odio aliquam nam error officiis est maiores quod ut voluptatibus velit. Et dolores ut reprehenderit quasi hic dignissimos internos ad molestiae excepturi.Non eius velit aut quidem distinctio ut voluptatibus quos. Et consectetur molestias sed veniam ullam hic nesciunt suscipit est autem voluptates est unde sint eum Quis nihil. Est perspiciatis explicabo aut exercitationem accusamus qui quasi corrupti sit fuga consectetur vel provident provident. Ex dolorem pariatur eos itaque aspernatur cum facilis soluta et consequatur facilis. Et exercitationem accusantium aut eligendi repudiandae At magnam corporis et dolorem debitis et veniam excepturi id quos rerum! Est perspiciatis aut magni sequi quo officia nostrum vel eius galisum aut necessitatibus culpa. Qui facere mollitia est totam quasi ea maxime unde quo assumenda officia ex sint ipsum ut rerum nihil sed dolorem unde. Sed veritatis nesciunt non voluptatem temporibus sed aliquid quia ea assumenda asperiores ut tempore ipsa est dignissimos illum? In laboriosam corrupti eum omnis tenetur aut alias dolore non ullam natus et iure aliquid quae incidunt. Sed eligendi deleniti qui nostrum exercitationem et nesciunt deleniti ut exercitationem nam tempora sequi cum saepe dicta. Et neque molestiae non nisi recusandae sit architecto voluptate a fugit temporibus et inventore sunt. Sed odit quae qui sequi doloremque ea internos porro ex unde quibusdam eum sapiente dicta. Est exercitationem maiores ad maxime enim aut officia nemo aut dolorum delectus. Eos voluptatem autem qui vero ipsum id reiciendis optio ex consequatur facere aut itaque dignissimos et consequuntur omnis in provident sint." textAlignment="JUSTIFY" textOverrun="CLIP" wrapText="true" />
+                                                            </content>
+                                                        </ScrollPane>
+                                                    </children>
+                                                </VBox>
+                                            </children>
+                                            <effect>
+                                                <DropShadow>
+                                                    <color>
+                                                        <Color red="0.7631579041481018" green="0.7207602262496948" blue="0.7207602262496948" />
+                                                    </color>
+                                                </DropShadow>
+                                            </effect>
+                                        </AnchorPane>
+                                    </children>
+                                </AnchorPane>
+                            </children>
+                        </VBox>
+                    </center>
+                </BorderPane>
+            </center>
+            <left>
+                <StackPane fx:id="folders_section_wrap" prefHeight="150.0" prefWidth="200.0" styleClass="folders-section-wrap" stylesheets="@../style/Style.css" BorderPane.alignment="CENTER">
+                    <children>
+                        <AnchorPane fx:id="folders_section" prefHeight="726.0" prefWidth="225.0" styleClass="folders-section" stylesheets="@../style/Style.css">
+                            <children>
+                                <ImageView fitHeight="29.0" fitWidth="29.0" layoutX="146.0" layoutY="14.0" pickOnBounds="true" preserveRatio="true" />
+                                <Label fx:id="folders_section_title" layoutX="14.0" layoutY="57.0" styleClass="folders-section-title" stylesheets="@../style/Style.css" text="Mailboxes" />
+                                <VBox fx:id="folders_section_folderlist" layoutX="40.0" layoutY="84.0" prefHeight="632.0" prefWidth="162.0" spacing="15.0" styleClass="folders-section-folderlist" stylesheets="@../style/Style.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="102.0">
+                                    <children>
+                                        <HBox fx:id="folder_item" alignment="CENTER_LEFT" onMouseClicked="#onFolderClick" prefHeight="36.0" prefWidth="180.0" spacing="3.0" styleClass="folder_item" stylesheets="@../style/Style.css">
+                                            <children>
+                                                <ImageView fitHeight="36.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                                                    <image>
+                                                        <Image url="@../imgs/inbox.png" />
+                                                    </image>
+                                                </ImageView>
+                                                <Label text="Inbox" />
+                                            </children>
+                                            <cursor>
+                                                <Cursor fx:constant="HAND" />
+                                            </cursor>
+                                        </HBox>
+                                        <HBox fx:id="spam_item" alignment="CENTER_LEFT" onMouseClicked="#onFolderClick" prefHeight="36.0" prefWidth="180.0" spacing="3.0" styleClass="folder_item">
+                                            <children>
+                                                <ImageView fitHeight="36.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                                                    <image>
+                                                        <Image url="@../imgs/spam.png" />
+                                                    </image>
+                                                </ImageView>
+                                                <Label text="Spam" />
+                                            </children>
+                                            <cursor>
+                                                <Cursor fx:constant="HAND" />
+                                            </cursor>
+                                        </HBox>
+                                        <HBox fx:id="junk_items" alignment="CENTER_LEFT" onMouseClicked="#onFolderClick" prefHeight="36.0" prefWidth="180.0" spacing="3.0" styleClass="folder_item" stylesheets="@../style/Style.css">
+                                            <children>
+                                                <ImageView fitHeight="36.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                                                    <image>
+                                                        <Image url="@../imgs/trash.png" />
+                                                    </image>
+                                                </ImageView>
+                                                <Label text="Trash" />
+                                            </children>
+                                            <cursor>
+                                                <Cursor fx:constant="HAND" />
+                                            </cursor>
+                                        </HBox>
+                                        <HBox fx:id="sent_item" alignment="CENTER_LEFT" onMouseClicked="#onFolderClick" prefHeight="36.0" prefWidth="180.0" spacing="3.0" styleClass="folder_item" stylesheets="@../style/Style.css">
+                                            <children>
+                                                <ImageView fitHeight="36.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                                                    <image>
+                                                        <Image url="@../imgs/sent.png" />
+                                                    </image>
+                                                </ImageView>
+                                                <Label text="Sent" />
+                                            </children>
+                                            <cursor>
+                                                <Cursor fx:constant="HAND" />
+                                            </cursor>
+                                        </HBox>
+                                        <Label styleClass="custom-folders-label" stylesheets="@../style/Style.css" text="Custom Folders" />
+                                    </children>
+                                </VBox>
+                            </children>
+                        </AnchorPane>
+                    </children>
+                </StackPane>
+            </left>
+            <top>
+                <AnchorPane prefHeight="52.0" prefWidth="1165.0" styleClass="window-head" BorderPane.alignment="CENTER">
+                    <children>
+                        <HBox alignment="CENTER_RIGHT" layoutX="469.0" layoutY="-31.0" prefHeight="42.0" prefWidth="1165.0" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <children>
+                                <ImageView fx:id="new_mail_btn" fitHeight="30.0" fitWidth="30.0" onMouseClicked="#show_new_mail" pickOnBounds="true" preserveRatio="true">
+                                    <image>
+                                        <Image url="@../imgs/new.png" />
+                                    </image>
+                                    <cursor>
+                                        <Cursor fx:constant="HAND" />
+                                    </cursor>
+                                </ImageView>
+                                <Label fx:id="head_username" styleClass="head-username" text="Vittorio" />
+                                <ImageView fitHeight="11.0" fitWidth="14.0" pickOnBounds="true" preserveRatio="true">
+                                    <image>
+                                        <Image url="@../imgs/arrowdown.png" />
+                                    </image>
+                                </ImageView>
+                            </children>
+                        </HBox>
+                    </children>
+                </AnchorPane>
+            </top>
+        </BorderPane>
+        <AnchorPane fx:id="new_mail_outer" opacity="0.0" prefHeight="726.0" prefWidth="1165.0" styleClass="new-mail-outer" stylesheets="@../style/Style.css" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <children>
+                <HBox alignment="CENTER" prefHeight="738.0" prefWidth="1165.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <children>
+                        <VBox fx:id="new_mail_wrap" maxHeight="617.0" prefHeight="582.0" prefWidth="563.0" spacing="5.0" styleClass="new-mail-wrap" stylesheets="@../style/Style.css">
+                            <children>
+                                <VBox prefHeight="63.0" prefWidth="533.0">
+                                    <children>
+                                        <Label fx:id="new_msg_undo" onMouseClicked="#hide_new_mail" styleClass="new-mail-undo" text="Undo" />
+                                        <AnchorPane prefHeight="39.0" prefWidth="533.0">
+                                            <children>
+                                                <Label layoutY="14.0" prefHeight="24.0" prefWidth="139.0" styleClass="new-mail-nm" text="New Message" AnchorPane.leftAnchor="0.0" />
+                                                <ImageView fx:id="new_msg_send_btn" fitHeight="56.0" fitWidth="77.0" layoutX="436.0" onMouseClicked="#send_new_mail" pickOnBounds="true" preserveRatio="true" styleClass="new-msg-send-btn" AnchorPane.rightAnchor="0.0">
+                                                    <image>
+                                                        <Image url="@../imgs/cannot_send.png" />
+                                                    </image>
+                                                </ImageView>
+                                            </children>
+                                        </AnchorPane>
+                                    </children>
+                                </VBox>
+                                <VBox prefHeight="91.0" prefWidth="513.0">
+                                    <children>
+                                        <HBox alignment="CENTER_LEFT" prefHeight="30.0" prefWidth="513.0" styleClass="new-mail-dataitem">
+                                            <children>
+                                                <Label prefWidth="34.0" styleClass="new-mail-datalabel" text="To:" />
+                                                <TextField fx:id="new_msg_to_datafield" prefHeight="33.0" prefWidth="474.0" styleClass="new-mail-datafield" HBox.hgrow="ALWAYS" />
+                                            </children>
+                                        </HBox>
+                                        <HBox alignment="CENTER_LEFT" prefHeight="30.0" prefWidth="513.0" styleClass="new-mail-dataitem">
+                                            <children>
+                                                <Label prefHeight="13.0" prefWidth="43.0" styleClass="new-mail-datalabel" text="Cc:" />
+                                                <TextField prefHeight="27.0" prefWidth="474.0" styleClass="new-mail-datafield" HBox.hgrow="ALWAYS" />
+                                            </children>
+                                        </HBox>
+                                        <HBox alignment="CENTER_LEFT" prefHeight="30.0" prefWidth="513.0" styleClass="new-mail-dataitem">
+                                            <children>
+                                                <Label prefHeight="13.0" prefWidth="58.0" styleClass="new-mail-datalabel" text="Object:" />
+                                                <TextField fx:id="new_msg_obj_datafield" prefHeight="33.0" prefWidth="474.0" styleClass="new-mail-datafield" HBox.hgrow="ALWAYS" />
+                                            </children>
+                                        </HBox>
+                                    </children>
+                                </VBox>
+                                <AnchorPane prefHeight="397.0" prefWidth="543.0">
+                                    <children>
+                                        <TextArea fx:id="new_msg_content" layoutX="167.0" layoutY="99.0" prefHeight="200.0" prefWidth="200.0" promptText="Write here..." styleClass="new-mail-content" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                    </children>
+                                </AnchorPane>
+                            </children>
+                        </VBox>
+                    </children>
+                </HBox>
+            </children>
+        </AnchorPane>
+        <AnchorPane fx:id="login_outer" prefHeight="726.0" prefWidth="1165.0" styleClass="signup-outer" stylesheets="@../style/Style.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <children>
+                <HBox alignment="CENTER" prefHeight="726.0" prefWidth="1165.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <children>
+                        <VBox alignment="TOP_CENTER" maxHeight="373.0" prefHeight="373.0" prefWidth="393.0" spacing="10.0">
+                            <children>
+                                <AnchorPane fx:id="login_logo_wrap" prefHeight="140.0" prefWidth="393.0" styleClass="login_logo_wrap">
+                                    <children>
+                                        <ImageView fitHeight="106.0" fitWidth="103.0" layoutX="145.0" pickOnBounds="true" preserveRatio="true">
+                                            <image>
+                                                <Image url="@../imgs/logo.png" />
+                                            </image>
+                                            <effect>
+                                                <DropShadow>
+                                                    <color>
+                                                        <Color red="0.8947368264198303" green="0.8947368264198303" blue="0.8947368264198303" />
+                                                    </color>
+                                                </DropShadow>
+                                            </effect>
+                                        </ImageView>
+                                        <Label layoutX="119.0" layoutY="97.0" styleClass="login-head-title" text="Log In to Unimail" />
+                                    </children>
+                                </AnchorPane>
+                                <Label fx:id="login_wrong_input" alignment="CENTER" opacity="0.0" prefHeight="65.0" prefWidth="393.0" styleClass="login-wrong-input" text="KEKKXKFXQWKDX" textAlignment="CENTER" />
+                                <VBox prefHeight="110.0" prefWidth="393.0" styleClass="login-form-wrap">
+                                    <children>
+                                        <TextField fx:id="login_usr_field" promptText="Username" styleClass="login-form-input" />
+                                        <TextField fx:id="login_psw_field" prefHeight="19.0" prefWidth="391.0" promptText="Password">
+                                            <styleClass>
+                                                <String fx:value="login-form-input" />
+                                                <String fx:value="login-form-psw-field" />
+                                            </styleClass>
+                                        </TextField>
+                                        <AnchorPane prefHeight="26.0" prefWidth="391.0">
+                                            <children>
+                                                <TextField fx:id="login_net_field" prefHeight="38.0" prefWidth="391.0" promptText="Network. es. 192.168.1.1:8080" styleClass="login-form-input" />
+                                                <ImageView fx:id="login_submit_btn" fitHeight="38.0" fitWidth="66.0" layoutX="335.0" onMouseClicked="#login" pickOnBounds="true" preserveRatio="true">
+                                                    <image>
+                                                        <Image url="@../imgs/right.png" />
+                                                    </image>
+                                                    <cursor>
+                                                        <Cursor fx:constant="HAND" />
+                                                    </cursor>
+                                                </ImageView>
+                                                <Pane fx:id="login_loader" layoutX="347.0" layoutY="4.0" prefHeight="30.0" prefWidth="32.0" styleClass="loader" visible="false" />
+                                            </children>
+                                        </AnchorPane>
+                                    </children>
+                                </VBox>
+                                <CheckBox mnemonicParsing="false" text="Rimani collegato" />
+                                <Label fx:id="show_signup_btn" onMouseClicked="#signup_transition" text="Don' t you have an account?">
+                                    <VBox.margin>
+                                        <Insets top="20.0" />
+                                    </VBox.margin>
+                                </Label>
+                            </children>
+                        </VBox>
+                    </children>
+                </HBox>
+            </children>
+        </AnchorPane>
+        <AnchorPane fx:id="signup_outer" prefHeight="726.0" prefWidth="1165.0" styleClass="login-outer" stylesheets="@../style/Style.css" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <children>
+                <HBox alignment="CENTER" prefHeight="726.0" prefWidth="1165.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <children>
+                        <VBox alignment="TOP_CENTER" maxHeight="342.0" prefHeight="342.0" prefWidth="393.0" spacing="10.0">
+                            <children>
+                                <ImageView fitHeight="106.0" fitWidth="103.0" pickOnBounds="true" preserveRatio="true">
+                                    <image>
+                                        <Image url="@../imgs/logo.png" />
+                                    </image>
+                                    <effect>
+                                        <DropShadow>
+                                            <color>
+                                                <Color red="0.8947368264198303" green="0.8947368264198303" blue="0.8947368264198303" />
+                                            </color>
+                                        </DropShadow>
+                                    </effect>
+                                </ImageView>
+                                <Label styleClass="signup-head-title" text="SignUp" />
+                                <VBox prefHeight="64.0" prefWidth="393.0" styleClass="signup-form-wrap">
+                                    <children>
+                                        <TextField fx:id="signup_usr_field" promptText="Username">
+                                            <styleClass>
+                                                <String fx:value="signup-form-input" />
+                                                <String fx:value="signup-form-usr-field" />
+                                            </styleClass>
+                                        </TextField>
+                                        <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                                            <children>
+                                                <TextField fx:id="signup_psw_field" prefHeight="38.0" prefWidth="391.0" promptText="Password" styleClass="signup-form-input" />
+                                                <ImageView fx:id="signup_submit_btn" fitHeight="38.0" fitWidth="66.0" layoutX="335.0" pickOnBounds="true" preserveRatio="true">
+                                                    <image>
+                                                        <Image url="@../imgs/right.png" />
+                                                    </image>
+                                                </ImageView>
+                                            </children>
+                                        </AnchorPane>
+                                    </children>
+                                </VBox>
+                                <CheckBox mnemonicParsing="false" text="Rimani collegato" />
+                                <Label fx:id="show_login_btn" onMouseClicked="#signup_transition" text="Log In Now">
+                                    <VBox.margin>
+                                        <Insets top="20.0" />
+                                    </VBox.margin>
+                                </Label>
+                            </children>
+                        </VBox>
+                    </children>
+                </HBox>
+            </children>
+        </AnchorPane>
+    </children>
+</AnchorPane>

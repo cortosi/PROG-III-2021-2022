@@ -1,0 +1,97 @@
+package unito.prog3.clientmail;
+
+import unito.prog3.models.Account;
+import unito.prog3.models.Mail;
+import unito.prog3.utils.ServerAPI;
+
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
+import java.util.ArrayList;
+
+public class Connection {
+
+    private Socket serverbound;
+
+    private ObjectInputStream in;
+    private ObjectOutputStream out;
+
+    public Connection(String host, int port) throws IOException {
+        serverbound = new Socket(host, port);
+
+        out = new ObjectOutputStream(serverbound.getOutputStream());
+        in = new ObjectInputStream(serverbound.getInputStream());
+    }
+
+    public String login_request(Account acc) throws IOException, ClassNotFoundException {
+        out.writeObject(ServerAPI.LOGIN_REQUEST);
+
+        //Sending credentials
+        sendCredentials(acc);
+
+        return getServerResponse();
+    }
+
+    public void sendCredentials(Account acc) throws IOException {
+        if (acc == null)
+            throw new IllegalArgumentException();
+
+        out.writeObject(acc);
+    }
+
+    public String getServerResponse() throws ClassNotFoundException, IOException {
+        return (String) in.readObject();
+    }
+
+    public String signupRequest(String username, String password) throws ClassNotFoundException {
+        if (username == null || password == null)
+            throw new IllegalArgumentException();
+        try {
+            out.writeObject(ServerAPI.REG_REQUEST);
+            // Sending credentials
+            out.writeObject(new Account(username, password));
+            // Getting server result
+            return (String) in.readObject();
+        } catch (IOException e) {
+            return "SERVER_UNREACHABLE";
+        }
+    }
+
+    public ArrayList<Mail> mailListRequest(String mailbox) throws IOException, ClassNotFoundException {
+        // Request
+        out.writeObject(ServerAPI.MAILBOX_LIST);
+
+        // Sending mailbox
+        out.writeObject(mailbox);
+
+        // Getting msgs list
+        Object res = in.readObject();
+        if (res instanceof ArrayList<?>) {
+            return ((ArrayList<Mail>) res);
+        } else
+            return null;
+    }
+
+    public void sendMailRequest() throws IOException {
+        out.writeObject(ServerAPI.SEND_MSG);
+    }
+
+    public String sendMessage(Mail msg) throws IOException, ClassNotFoundException {
+        if (msg == null)
+            throw new IllegalArgumentException();
+
+        out.writeObject(msg);
+
+        // Wait response
+        return getServerResponse();
+    }
+
+    public void moveMailRequest(Mail tomvoe) throws IOException {
+        out.writeObject(ServerAPI.MOVE_REQ);
+
+        System.out.println(tomvoe.getBelonging() + " " + tomvoe.getMoveto());
+        // Sending Mail to move
+        out.writeObject(tomvoe);
+    }
+}
