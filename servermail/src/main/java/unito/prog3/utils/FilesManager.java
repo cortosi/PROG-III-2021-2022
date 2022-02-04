@@ -16,38 +16,38 @@ public class FilesManager {
     public static final String INBOX_FILENAME = "inbox.txt";
     public static final String SPAM_FILENAME = "spam.txt";
     public static final String TRASH_FILENAME = "trash.txt";
+    public static final String SENT_FILENAME = "sent.txt";
 
     public FilesManager() {
 
     }
 
-    public static void createUserFiles(String username, String password) throws Exception {
-        if (username == null ||
-                password == null)
-            throw new Exception();
+    public synchronized static void createFiles(String username)
+            throws IllegalArgumentException, IOException {
 
-        File users = new File(USERS_FILE_PATH);
+        if (username == null)
+            throw new IllegalArgumentException("[Illegal Argument]: username to be created must be not null");
 
-        // Adding user into users file list
-        BufferedWriter buff = new BufferedWriter(new PrintWriter(users));
-        buff.append(username + ":" + password + "\n").flush();
-
-        // Creating User dir for the user
+        // Creating User dir
         Files.createDirectories(Paths.get(USERS_DIR_PATH + username));
 
-        // Creating messages file for the user
-        File file = new File(USERS_DIR_PATH + username + "/" + INBOX_FILENAME);
-        file.createNewFile();
+        // Creating inboxes files
+        File inbox = new File(USERS_DIR_PATH + username + "/" + INBOX_FILENAME);
+        File spam = new File(USERS_DIR_PATH + username + "/" + SPAM_FILENAME);
+        File sent = new File(USERS_DIR_PATH + username + "/" + SENT_FILENAME);
+        File trash = new File(USERS_DIR_PATH + username + "/" + TRASH_FILENAME);
 
-        // Closing buffers
-        buff.close();
+        inbox.createNewFile();
+        spam.createNewFile();
+        sent.createNewFile();
+        trash.createNewFile();
     }
 
-    public static ArrayList<Account> extractUsers() throws IOException {
+    public synchronized static ArrayList<Account> getUsers()
+            throws IOException {
         String line = null;
 
         File usersFile = new File(USERS_FILE_PATH);
-        ArrayList<Account> userlist = new ArrayList<>();
 
         // Check for users empty
         if (usersFile.length() == 0)
@@ -55,6 +55,8 @@ public class FilesManager {
 
         // If not empty, extract all users
         BufferedReader buff = new BufferedReader(new FileReader(usersFile));
+
+        ArrayList<Account> userlist = new ArrayList<>();
 
         // Loop over lines and
         while ((line = buff.readLine()) != null) {
@@ -69,46 +71,52 @@ public class FilesManager {
         return userlist;
     }
 
-    public static void addUserToFile(Account new_user) throws IOException {
+    public synchronized static void addUserToFile(Account new_user)
+            throws IOException {
+
         if (new_user == null)
             throw new IllegalArgumentException();
 
         File usersfile = new File(USERS_FILE_PATH);
-        BufferedWriter buff = new BufferedWriter(new FileWriter(usersfile, true));
-        buff.write(new_user.getUsername() + ":" + new_user.getPassword() + "\n");
-        buff.close();
+
+        if (!usersfile.exists())
+            throw new FileNotFoundException("[File not found]: Cannot add user, users file does not exist");
+
+        PrintWriter writer = new PrintWriter(new FileWriter(usersfile, true));
+        writer.append(new_user.getUsername() + ":" + new_user.getPassword() + "\n");
+
+        writer.close();
     }
 
-    public static boolean dirExist(String username) {
+    public synchronized static boolean dirExist(String username)
+            throws IllegalArgumentException {
+
+        if (username == null)
+            throw new IllegalArgumentException();
+
         return Files.exists(Paths.get(USERS_DIR_PATH + username));
     }
 
-    public static boolean inboxExist(String username) {
-        return Files.exists(Paths.get(USERS_DIR_PATH + username + "/" + INBOX_FILENAME));
-    }
-
-    public static File getInboxFile(String username) {
-        if (dirExist(username))
-            if (inboxExist(username))
-                return new File(USERS_DIR_PATH + username + "/" + INBOX_FILENAME);
-        return null;
-    }
-
     // Mailboxes methods
-    public static ArrayList<Mail> getMailBox(String mbox_name, String username) throws Exception {
+    public synchronized static ArrayList<Mail> getMailBox(String mbox_name, String username)
+            throws IOException {
+
+        if (mbox_name == null || username == null)
+            throw new IllegalArgumentException();
+
         String line = null;
 
         ArrayList<Mail> mailbox = new ArrayList<>();
 
         // Check for user directory exists
         File userDir = new File(USERS_DIR_PATH + username);
-        if (!(userDir.exists() && userDir.isDirectory()))
-            throw new Exception();
+        if (!(userDir.exists()))
+            throw new FileNotFoundException("[File not found]: Impossible to get Mailbox");
 
         // Check for requested file exist
         File mbox = new File(USERS_DIR_PATH + username + "/" + mbox_name + ".txt");
-        if (!userDir.exists())
-            throw new Exception();
+        if (!(mbox.exists()))
+            mbox.createNewFile();
 
         if (mbox.length() == 0)
             return null;
@@ -141,12 +149,17 @@ public class FilesManager {
         return mailbox;
     }
 
-    public static void rmMailFromMailbox(String owner, Mail toremove) throws IOException {
+    public synchronized static void rmMailFromMailbox(String owner, Mail toremove)
+            throws IOException {
+
+        if (owner == null || toremove == null)
+            throw new IllegalArgumentException();
+
         String mailboxName = toremove.getBelonging();
         String lineToRemove = toremove.toString();
 
-        // Aux file
-        String aux_path = USERS_DIR_PATH + owner + "/inboxt.txt";
+        // Creating new file
+        String aux_path = USERS_DIR_PATH + owner + mailboxName + "_n.txt";
         File newMailbox = new File(aux_path);
 
         // Building mailbox path
@@ -170,8 +183,10 @@ public class FilesManager {
         newMailbox.renameTo(oldMailbox);
     }
 
-    public static void insMailToMailbox(String owner, Mail toinsert) throws IOException {
-        if (toinsert == null || toinsert.getMoveto() == null)
+    public synchronized static void insMailToMailbox(String owner, Mail toinsert)
+            throws IOException {
+
+        if (toinsert == null || owner == null)
             throw new IllegalArgumentException();
 
         // Building file dest path
@@ -186,7 +201,9 @@ public class FilesManager {
         writer.close();
     }
 
-    public static void moveMail(String owner, Mail tomove) throws IOException {
+    public synchronized static void moveMail(String owner, Mail tomove)
+            throws IOException {
+
         if (tomove == null)
             throw new IllegalArgumentException();
 

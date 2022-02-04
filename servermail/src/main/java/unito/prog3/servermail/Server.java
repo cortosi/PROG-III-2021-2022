@@ -13,17 +13,24 @@ import java.util.HashMap;
 
 public class Server implements Runnable {
 
-    ServerSocket clientbound;
+    private final int NOTIFY_PORT = 2021;
+
+    private final ServerSocket clientSocket;
+    private final ServerSocket notifySocket;
 
     private static HashMap<String, Account> accounts;
+    private static HashMap<String, Socket> connections;
 
-    public Server(final int port) throws IOException {
-        this.clientbound = new ServerSocket(port);
+    public Server(final int port)
+            throws IOException {
+        this.clientSocket = new ServerSocket(port);
+        this.notifySocket = new ServerSocket(NOTIFY_PORT);
         this.accounts = new HashMap<String, Account>();
     }
 
-    public Socket waitClient() throws IOException {
-        return clientbound.accept();
+    public Socket waitClient()
+            throws IOException {
+        return clientSocket.accept();
     }
 
     public boolean accountExist(String username) {
@@ -37,8 +44,13 @@ public class Server implements Runnable {
         return (accounts.get(username));
     }
 
-    public void loadUsersList() throws Exception {
-        ArrayList<Account> accountList = FilesManager.extractUsers();
+    public void loadUsersList()
+            throws Exception {
+        ArrayList<Account> accountList = FilesManager.getUsers();
+
+        if (accountList == null)
+            return;
+
         for (Account account : accountList) {
             loadUser(account);
         }
@@ -51,12 +63,14 @@ public class Server implements Runnable {
         accounts.put(acc.getUsername(), acc);
     }
 
-    public String sendMail(Mail msg) throws IOException {
-        ArrayList<String> dests = msg.getDests();
-
+    public String sendMail(Mail msg)
+            throws IOException {
         // src:title:<dst1:dst2>:content
-        if (dests == null || msg == null)
+        if (msg == null)
             throw new IllegalArgumentException();
+
+        // Extract destinations
+        ArrayList<String> dests = msg.getDests();
 
         // Check for destinations exist
         for (String dest : dests) {
@@ -79,8 +93,7 @@ public class Server implements Runnable {
         while (true) {
             try {
                 Socket newClient = waitClient();
-                HandleClient hc = new HandleClient(newClient, this);
-                hc.run();
+                new Thread(new HandleClient(newClient, this)).start();
             } catch (IOException e) {
                 e.printStackTrace();
             }

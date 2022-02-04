@@ -6,6 +6,7 @@ import unito.prog3.utils.FilesManager;
 import unito.prog3.utils.ServerAPI;
 
 import java.io.IOException;
+import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
@@ -23,7 +24,12 @@ public class HandleClient implements Runnable {
     private ObjectInputStream in;
 
     // Constructor
-    public HandleClient(Socket clientSocket, Server server) throws IOException {
+    public HandleClient(Socket clientSocket, Server server)
+            throws IllegalArgumentException, IOException {
+
+        if (clientSocket == null || server == null)
+            throw new IllegalArgumentException();
+
         this.server = server;
         this.clientSocket = clientSocket;
 
@@ -32,21 +38,32 @@ public class HandleClient implements Runnable {
     }
 
     //
-    public void setupThread() throws Exception {
+    public void setupThread()
+            throws Exception {
     }
 
-    public void sendResponse(Object response) throws IOException {
+    public void sendResponse(Object response)
+            throws IllegalArgumentException, IOException {
+
+        if (response == null)
+            throw new IllegalArgumentException("[Illegal Argument]: Response cannot be null");
+
         out.writeObject(response);
     }
 
     // Login / Signup
-    public void waitSignupData() throws IOException, ClassNotFoundException {
-        Account acc = (Account) in.readObject();
+    public void waitSignupData()
+            throws IOException, ClassNotFoundException {
 
-        String username = acc.getUsername();
-        String password = acc.getPassword();
+        Object obj = in.readObject();
 
-        // Check username
+        if (!(obj instanceof Account new_acc))
+            throw new InvalidObjectException("[Invalid Object]: Account required for SignUp");
+
+        String username = new_acc.getUsername();
+        String password = new_acc.getPassword();
+
+        // Check username already exists
         if (server.accountExist(username))
             sendResponse("USR_EXIST");
         else {
@@ -55,30 +72,33 @@ public class HandleClient implements Runnable {
                         "[" + Thread.currentThread() + "]: Client(" + clientSocket.getInetAddress()
                                 + ") signup data accepted, saved into users file");
                 sendResponse("REG");
-                createNewUser(acc);
+                createNewUser(new_acc);
             } else
                 sendResponse("PSW_ERR");
         }
     }
 
-    public void waitLoginData() throws ClassNotFoundException, IOException {
-        Account acc = (Account) in.readObject();
+    public void waitLoginData()
+            throws ClassNotFoundException, IOException {
+
+        Object obj = in.readObject();
+
+        if (!(obj instanceof Account acc))
+            throw new InvalidObjectException("[Invalid Object]: Account required for Login");
 
         String username = acc.getUsername();
         String password = acc.getPassword();
 
         // Check username
         if (server.accountExist(username)) {
-            Account aux = server.getAccount(username);
-
             //Check password
-            if (password.equals(aux.getPassword())) {
+            if (password.equals(server.getAccount(username).getPassword())) {
                 System.out.println(
                         "[" + Thread.currentThread() + "]: Client(" + clientSocket.getInetAddress()
                                 + ") authenticated");
 
                 clientAcc = acc;
-                sendResponse("AUTH"); // If of, authorized
+                sendResponse("AUTH");
             } else {
                 System.out.println(
                         "[" + Thread.currentThread() + "]: Client(" + clientSocket.getInetAddress()
@@ -93,9 +113,11 @@ public class HandleClient implements Runnable {
         }
     }
 
-    public void createNewUser(Account new_acc) throws IOException {
+    public void createNewUser(Account new_acc)
+            throws IOException {
+
         if (new_acc == null)
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("[Illegal Argument]: account must be not null");
 
         FilesManager.addUserToFile(new_acc);
 
@@ -104,9 +126,13 @@ public class HandleClient implements Runnable {
     }
 
     // Messages list
-    public void waitMailbox() throws Exception {
-        // Waiting for mailbox
-        String mailbox = (String) in.readObject();
+    public void waitMailbox()
+            throws Exception {
+
+        Object obj = in.readObject();
+
+        if (!(obj instanceof String mailbox))
+            throw new InvalidObjectException("[Invalid Object]: String required for mailbox mail");
 
         ArrayList<Mail> mail = FilesManager.getMailBox(mailbox, clientAcc.getUsername());
 
@@ -114,52 +140,37 @@ public class HandleClient implements Runnable {
     }
 
     // Mail sending
-    public void waitMailToSend() throws IOException, ClassNotFoundException {
+    public void waitMailToSend()
+            throws IOException, ClassNotFoundException {
         // Getting message from client
         Object obj = in.readObject();
-        Mail msg;
 
-        if (obj == null)
-            throw new IOException();
+        if (!(obj instanceof Mail mail))
+            throw new InvalidObjectException("[Invalid Object]: Mail required for sending");
 
-        if (obj instanceof Mail) {
-            msg = (Mail) obj;
-
-            // Sending server response
-            sendResponse(server.sendMail(msg));
-        }
+        // Sending server response
+        sendResponse(server.sendMail(mail));
     }
 
     // Mail Moving
-    public void waitMailToMove() throws IOException, ClassNotFoundException {
+    public void waitMailToMove()
+            throws IOException, ClassNotFoundException {
         // Getting message from client
         Object obj = in.readObject();
-        Mail tomove;
 
-        if (obj == null)
-            throw new IOException();
+        if (!(obj instanceof Mail tomove))
+            throw new InvalidObjectException("[Invalid Object]: Mail required for moving");
 
-        if (obj instanceof Mail) {
-            tomove = (Mail) obj;
-
-            FilesManager.moveMail(clientAcc.getUsername(), tomove);
-        }
+        FilesManager.moveMail(clientAcc.getUsername(), tomove);
     }
 
     @Override
     public synchronized void run() {
         // Thread Name
-//        Thread.currentThread().setName("");
+        // Thread.currentThread().setName("");
 
-        //
         System.out.println(
                 "[" + Thread.currentThread() + "]: Connection established with: " + clientSocket.getInetAddress());
-
-        try {
-            setupThread();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
         while (!exit) {
             Object read = null;
@@ -198,12 +209,18 @@ public class HandleClient implements Runnable {
                                 waitMailToMove();
                             }
                         }
-                    }
-                }
+                    } else
+                        throw new InvalidObjectException("[Invalid Object]: ServerAPI required");
+                } else
+                    throw new IllegalArgumentException("[Illegal Argument]: API should be not null");
+            } catch (IllegalArgumentException e) {
+                System.out.println(e.getMessage());
             } catch (IOException e) {
+                System.out.println(e.getMessage());
                 e.printStackTrace();
                 exit = true;
             } catch (ClassNotFoundException e) {
+                System.out.println("Illegal class sent");
                 e.printStackTrace();
             }
         }
