@@ -40,6 +40,8 @@ public class Controller {
 
     private static final String NETWORK_PATTERN = "^([0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9])\\:([0-9]+)$";
 
+    private static final String EMAIL_PATTERN = "^([a-z]|[A-Z])\\w{0,20}$";
+
     private final int folders_section_width = 200;
 
     private final Image can_send = new Image(MailClient.class.getResource("imgs/can_send.png").toString());
@@ -56,6 +58,8 @@ public class Controller {
     private Rectangle sign_up_outer_clip = new Rectangle();
 
     private Rectangle login_wrong_input_clip = new Rectangle();
+
+    private Rectangle signup_wrong_input_clip = new Rectangle();
 
     // Transition/Animation Objs
     RotateTransition rotateLoginLoader = new RotateTransition();
@@ -88,10 +92,16 @@ public class Controller {
     private Pane login_loader;
 
     @FXML
+    private AnchorPane signup_logo_wrap;
+
+    @FXML
     private AnchorPane login_logo_wrap;
 
     @FXML
     private Label show_signup_btn;
+
+    @FXML
+    private Label signup_wrong_input;
 
     @FXML
     private Label login_wrong_input;
@@ -151,28 +161,8 @@ public class Controller {
     }
 
     @FXML
-    public void sign_up() throws IOException, ClassNotFoundException {
-        String username = signup_usr_field.getText();
-        String password = signup_psw_field.getText();
-
-        password = Security.encryptSHA(password);
-
-        connection = new Connection("127.0.0.1", 1998);
-        String res = connection.signupRequest(username, password);
-
-        if (res.equals("REG")) {
-            show_login_section();
-            return;
-        }
-
-//        if (res == null)
-//            signup_login_wrong_input.setText("Error occured");
-//
-//        if (res.equals("USR_EXIST"))
-//            signup_login_wrong_input.setText("Username already exist");
-//
-//        if (res.equals("SERVER_UREACHABLE"))
-//            signup_login_wrong_input.setText("Server Unreachable");
+    public void signUp() throws IOException, ClassNotFoundException {
+        new Thread(new signUpThread()).start();
     }
 
     @FXML
@@ -242,6 +232,19 @@ public class Controller {
 
         tl.play();
     }
+
+    public void show_signup_wrong(String text) {
+        signup_wrong_input.setText(text);
+
+        Timeline tl = new Timeline(new KeyFrame(Duration.millis(400),
+                new KeyValue(signup_logo_wrap.translateYProperty(), 0),
+                new KeyValue(signup_wrong_input.prefHeightProperty(), 60),
+                new KeyValue(signup_wrong_input.opacityProperty(), 1)
+        ));
+
+        tl.play();
+    }
+
 
     // Side section
     @FXML
@@ -367,7 +370,7 @@ public class Controller {
         login_outer_clip.widthProperty().bind(login_outer.widthProperty());
         login_outer.setClip(login_outer_clip);
 
-        //
+        // LOGIN WRONG
         login_logo_wrap.setTranslateY(35);
 
         login_wrong_input_clip.heightProperty().bind(login_wrong_input.prefHeightProperty());
@@ -375,6 +378,15 @@ public class Controller {
         login_wrong_input.setClip(login_wrong_input_clip);
 
         login_wrong_input.prefHeightProperty().set(0);
+
+        // SIGNUP WRONG
+        signup_logo_wrap.setTranslateY(35);
+
+        signup_wrong_input_clip.heightProperty().bind(signup_wrong_input.prefHeightProperty());
+        signup_wrong_input_clip.widthProperty().bind(signup_wrong_input.prefWidthProperty());
+        signup_wrong_input.setClip(signup_wrong_input_clip);
+
+        signup_wrong_input.prefHeightProperty().set(0);
 
         //
         rotateLoginLoader.byAngleProperty().set(360);
@@ -399,7 +411,7 @@ public class Controller {
     }
 
 
-    // Custom JavaFX
+    // Custom JavaFX Graphics
     public class mailItem extends VBox {
         private final Mail mailbind;
 
@@ -637,6 +649,44 @@ public class Controller {
 
         private void hide_login_loader() {
             login_loader.setVisible(false);
+        }
+    }
+
+    public class signUpThread implements Runnable {
+
+        @Override
+        public void run() {
+            Platform.runLater(() -> {
+                try {
+                    signUp();
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+
+        private void signUp()
+                throws ClassNotFoundException {
+
+            // Extracting fields
+            String username = signup_usr_field.getText();
+            String password = signup_psw_field.getText();
+
+            // Regex check
+            Pattern emailPattern = Pattern.compile(EMAIL_PATTERN, Pattern.CASE_INSENSITIVE);
+            Matcher emailMatcher = emailPattern.matcher(username);
+
+            if (emailMatcher.find()) {
+                if (password.length() != 0) {
+                    // Encryption
+                    password = Security.encryptSHA(password);
+
+                    Account new_acc = new Account(username, password);
+
+                    String res = connection.signupRequest(new_acc);
+                }
+            } else
+                show_signup_wrong("Wrong Username");
         }
     }
 

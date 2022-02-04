@@ -17,14 +17,16 @@ public class Connection {
     private ObjectInputStream in;
     private ObjectOutputStream out;
 
-    public Connection(String host, int port) throws IOException {
+    public Connection(String host, int port)
+            throws IOException {
         serverbound = new Socket(host, port);
 
         out = new ObjectOutputStream(serverbound.getOutputStream());
         in = new ObjectInputStream(serverbound.getInputStream());
     }
 
-    public String login_request(Account acc) throws IOException, ClassNotFoundException {
+    public String login_request(Account acc)
+            throws IOException, ClassNotFoundException {
         out.writeObject(ServerAPI.LOGIN_REQUEST);
 
         //Sending credentials
@@ -33,24 +35,29 @@ public class Connection {
         return getServerResponse();
     }
 
-    public void sendCredentials(Account acc) throws IOException {
+    public void sendCredentials(Account acc)
+            throws IOException {
         if (acc == null)
             throw new IllegalArgumentException();
 
         out.writeObject(acc);
     }
 
-    public String getServerResponse() throws ClassNotFoundException, IOException {
+    public String getServerResponse()
+            throws ClassNotFoundException, IOException {
         return (String) in.readObject();
     }
 
-    public String signupRequest(String username, String password) throws ClassNotFoundException {
-        if (username == null || password == null)
+    public String signupRequest(Account new_acc)
+            throws ClassNotFoundException {
+
+        if (new_acc == null)
             throw new IllegalArgumentException();
+
         try {
             out.writeObject(ServerAPI.REG_REQUEST);
             // Sending credentials
-            out.writeObject(new Account(username, password));
+            out.writeObject(new_acc);
             // Getting server result
             return (String) in.readObject();
         } catch (IOException e) {
@@ -58,7 +65,8 @@ public class Connection {
         }
     }
 
-    public ArrayList<Mail> mailListRequest(String mailbox) throws IOException, ClassNotFoundException {
+    public ArrayList<Mail> mailListRequest(String mailbox)
+            throws IOException, ClassNotFoundException {
         // Request
         out.writeObject(ServerAPI.MAILBOX_LIST);
 
@@ -73,11 +81,13 @@ public class Connection {
             return null;
     }
 
-    public void sendMailRequest() throws IOException {
+    public void sendMailRequest()
+            throws IOException {
         out.writeObject(ServerAPI.SEND_MSG);
     }
 
-    public String sendMessage(Mail msg) throws IOException, ClassNotFoundException {
+    public String sendMessage(Mail msg)
+            throws IOException, ClassNotFoundException {
         if (msg == null)
             throw new IllegalArgumentException();
 
@@ -87,7 +97,8 @@ public class Connection {
         return getServerResponse();
     }
 
-    public void moveMailRequest(Mail tomvoe) throws IOException {
+    public void moveMailRequest(Mail tomvoe)
+            throws IOException {
         out.writeObject(ServerAPI.MOVE_REQ);
 
         System.out.println(tomvoe.getBelonging() + " " + tomvoe.getMoveto());

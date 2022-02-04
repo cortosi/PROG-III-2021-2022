@@ -273,7 +273,7 @@
         </AnchorPane>
         <AnchorPane fx:id="login_outer" prefHeight="726.0" prefWidth="1165.0" styleClass="signup-outer" stylesheets="@../style/Style.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <children>
-                <HBox alignment="CENTER" prefHeight="726.0" prefWidth="1165.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                <HBox alignment="CENTER" layoutY="7.0" prefHeight="726.0" prefWidth="1165.0" AnchorPane.bottomAnchor="-7.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="7.0">
                     <children>
                         <VBox alignment="TOP_CENTER" maxHeight="373.0" prefHeight="373.0" prefWidth="393.0" spacing="10.0">
                             <children>
@@ -291,10 +291,10 @@
                                                 </DropShadow>
                                             </effect>
                                         </ImageView>
-                                        <Label layoutX="119.0" layoutY="97.0" styleClass="login-head-title" text="Log In to Unimail" />
+                                        <Label layoutX="119.0" layoutY="103.0" styleClass="login-head-title" text="Log In to Unimail" />
                                     </children>
                                 </AnchorPane>
-                                <Label fx:id="login_wrong_input" alignment="CENTER" opacity="0.0" prefHeight="65.0" prefWidth="393.0" styleClass="login-wrong-input" text="KEKKXKFXQWKDX" textAlignment="CENTER" />
+                                <Label fx:id="login_wrong_input" alignment="CENTER" opacity="0.0" prefHeight="60.0" prefWidth="393.0" styleClass="login-wrong-input" textAlignment="CENTER" />
                                 <VBox prefHeight="110.0" prefWidth="393.0" styleClass="login-form-wrap">
                                     <children>
                                         <TextField fx:id="login_usr_field" promptText="Username" styleClass="login-form-input" />
@@ -332,40 +332,57 @@
                 </HBox>
             </children>
         </AnchorPane>
-        <AnchorPane fx:id="signup_outer" prefHeight="726.0" prefWidth="1165.0" styleClass="login-outer" stylesheets="@../style/Style.css" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <AnchorPane fx:id="signup_outer" prefHeight="726.0" prefWidth="1165.0" styleClass="login-outer" stylesheets="@../style/Style.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <children>
                 <HBox alignment="CENTER" prefHeight="726.0" prefWidth="1165.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <children>
                         <VBox alignment="TOP_CENTER" maxHeight="342.0" prefHeight="342.0" prefWidth="393.0" spacing="10.0">
                             <children>
-                                <ImageView fitHeight="106.0" fitWidth="103.0" pickOnBounds="true" preserveRatio="true">
-                                    <image>
-                                        <Image url="@../imgs/logo.png" />
-                                    </image>
-                                    <effect>
-                                        <DropShadow>
-                                            <color>
-                                                <Color red="0.8947368264198303" green="0.8947368264198303" blue="0.8947368264198303" />
-                                            </color>
-                                        </DropShadow>
-                                    </effect>
-                                </ImageView>
-                                <Label styleClass="signup-head-title" text="SignUp" />
+                        <AnchorPane fx:id="signup_logo_wrap" prefHeight="140.0" prefWidth="393.0" styleClass="login_logo_wrap">
+                           <children>
+                              <ImageView fitHeight="106.0" fitWidth="103.0" layoutX="145.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@../imgs/logo.png" />
+                                 </image>
+                                 <effect>
+                                    <DropShadow>
+                                       <color>
+                                          <Color red="0.8947368264198303" green="0.8947368264198303" blue="0.8947368264198303" />
+                                       </color>
+                                    </DropShadow>
+                                 </effect>
+                              </ImageView>
+                              <Label layoutX="119.0" layoutY="102.0" styleClass="signup-head-title" text="SignUp to Unimail" />
+                           </children>
+                        </AnchorPane>
+                                <Label fx:id="signup_wrong_input" alignment="CENTER" opacity="0.0" prefHeight="60.0" prefWidth="393.0" styleClass="signup-wrong-input" textAlignment="CENTER" />
                                 <VBox prefHeight="64.0" prefWidth="393.0" styleClass="signup-form-wrap">
                                     <children>
-                                        <TextField fx:id="signup_usr_field" promptText="Username">
-                                            <styleClass>
-                                                <String fx:value="signup-form-input" />
-                                                <String fx:value="signup-form-usr-field" />
-                                            </styleClass>
-                                        </TextField>
+                              <AnchorPane prefHeight="200.0" prefWidth="200.0">
+                                 <children>
+                                    <HBox prefHeight="40.0" prefWidth="391.0">
+                                       <children>
+                                                    <TextField fx:id="signup_usr_field" prefHeight="40.0" prefWidth="302.0" promptText="Username">
+                                                        <styleClass>
+                                                            <String fx:value="signup-form-input" />
+                                                            <String fx:value="signup-form-usr-field" />
+                                                        </styleClass>
+                                                    </TextField>
+                                          <TextField prefHeight="40.0" prefWidth="145.0" styleClass="signup-form-domain" text="\@Unimail.com" />
+                                       </children>
+                                    </HBox>
+                                 </children>
+                              </AnchorPane>
                                         <AnchorPane prefHeight="200.0" prefWidth="200.0">
                                             <children>
                                                 <TextField fx:id="signup_psw_field" prefHeight="38.0" prefWidth="391.0" promptText="Password" styleClass="signup-form-input" />
-                                                <ImageView fx:id="signup_submit_btn" fitHeight="38.0" fitWidth="66.0" layoutX="335.0" pickOnBounds="true" preserveRatio="true">
+                                                <ImageView fx:id="signup_submit_btn" fitHeight="38.0" fitWidth="66.0" layoutX="335.0" onMouseClicked="#signUp" pickOnBounds="true" preserveRatio="true">
                                                     <image>
                                                         <Image url="@../imgs/right.png" />
                                                     </image>
+                                       <cursor>
+                                          <Cursor fx:constant="HAND" />
+                                       </cursor>
                                                 </ImageView>
                                             </children>
                                         </AnchorPane>
