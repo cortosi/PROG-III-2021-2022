@@ -3,6 +3,7 @@ package unito.prog3.controllers;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -38,33 +39,27 @@ public class Controller {
 
     private static final String PORT_PATTERN = "^([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$";
 
-    private static final String NETWORK_PATTERN = "^([0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9])\\:([0-9]+)$";
+    private static final String NETWORK_PATTERN = "^([0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]):([0-9]+)$";
 
     private static final String EMAIL_PATTERN = "^([a-z]|[A-Z])\\w{0,20}$";
 
     private final int folders_section_width = 200;
 
-    private final Image can_send = new Image(MailClient.class.getResource("imgs/can_send.png").toString());
-    private final Image cannot_send = new Image(MailClient.class.getResource("imgs/cannot_send.png").toString());
+    private final Image can_send = new Image(Objects.requireNonNull(MailClient.class.getResource("imgs/can_send.png")).toString());
+    private final Image cannot_send = new Image(Objects.requireNonNull(MailClient.class.getResource("imgs/cannot_send.png")).toString());
 
     // Regions
 
-    private Rectangle folders_section_clip = new Rectangle();
+    private final Rectangle folders_section_clip = new Rectangle();
 
-    private Rectangle new_mail_clip = new Rectangle();
+    private final Rectangle login_wrong_input_clip = new Rectangle();
 
-    private Rectangle login_outer_clip = new Rectangle();
-
-    private Rectangle sign_up_outer_clip = new Rectangle();
-
-    private Rectangle login_wrong_input_clip = new Rectangle();
-
-    private Rectangle signup_wrong_input_clip = new Rectangle();
+    private final Rectangle signup_wrong_input_clip = new Rectangle();
 
     // Transition/Animation Objs
     RotateTransition rotateLoginLoader = new RotateTransition();
 
-    private emptyMailbox empty_msg_list = new emptyMailbox();
+    private final emptyMailbox empty_msg_list = new emptyMailbox();
 
     //FXML Objs
     @FXML
@@ -105,9 +100,6 @@ public class Controller {
 
     @FXML
     private Label login_wrong_input;
-
-    @FXML
-    private ImageView signup_submit_btn;
 
     @FXML
     private ImageView login_submit_btn;
@@ -161,7 +153,7 @@ public class Controller {
     }
 
     @FXML
-    public void signUp() throws IOException, ClassNotFoundException {
+    public void signUp() {
         new Thread(new signUpThread()).start();
     }
 
@@ -201,24 +193,13 @@ public class Controller {
     }
 
     public void show_signup_section() {
-        Timeline tl;
-
-        tl = new Timeline(new KeyFrame(Duration.millis(500),
-                new KeyValue(sign_up_outer_clip.translateXProperty(), 0),
-                new KeyValue(login_outer_clip.translateXProperty(), -main.getWidth())
-        ));
-
-        tl.play();
+        login_outer.setVisible(false);
+        signup_outer.setVisible(true);
     }
 
     public void show_login_section() {
-        Timeline tl;
-
-        tl = new Timeline(new KeyFrame(Duration.millis(500),
-                new KeyValue(sign_up_outer_clip.translateXProperty(), main.getWidth()),
-                new KeyValue(login_outer_clip.translateXProperty(), 0)));
-
-        tl.play();
+        signup_outer.setVisible(false);
+        login_outer.setVisible(true);
     }
 
     public void show_login_wrong(String text) {
@@ -359,16 +340,6 @@ public class Controller {
         // Binding min/max to pref, to not allow the panes width change.
         folders_section_wrap.minWidthProperty().bind(folders_section_wrap.prefWidthProperty());
         folders_section_wrap.maxWidthProperty().bind(folders_section_wrap.prefWidthProperty());
-
-        // SIGNUP CLIP SETUP
-        sign_up_outer_clip.heightProperty().bind(signup_outer.heightProperty());
-        sign_up_outer_clip.widthProperty().bind(signup_outer.widthProperty());
-        signup_outer.setClip(sign_up_outer_clip);
-
-        // LOGIN CLIP SETUP
-        login_outer_clip.heightProperty().bind(login_outer.heightProperty());
-        login_outer_clip.widthProperty().bind(login_outer.widthProperty());
-        login_outer.setClip(login_outer_clip);
 
         // LOGIN WRONG
         login_logo_wrap.setTranslateY(35);

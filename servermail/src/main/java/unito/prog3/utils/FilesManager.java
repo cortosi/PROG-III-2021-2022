@@ -22,6 +22,8 @@ public class FilesManager {
 
     }
 
+    // File methods
+
     public synchronized static void createFiles(String username)
             throws IllegalArgumentException, IOException {
 
@@ -41,6 +43,32 @@ public class FilesManager {
         spam.createNewFile();
         sent.createNewFile();
         trash.createNewFile();
+    }
+
+    public synchronized static boolean dirExist(String username)
+            throws IllegalArgumentException {
+
+        if (username == null)
+            throw new IllegalArgumentException();
+
+        return Files.exists(Paths.get(USERS_DIR_PATH + username));
+    }
+
+    public synchronized static void addUserToFile(Account new_user)
+            throws IOException {
+
+        if (new_user == null)
+            throw new IllegalArgumentException();
+
+        File usersfile = new File(USERS_FILE_PATH);
+
+        if (!usersfile.exists())
+            throw new FileNotFoundException("[File not found]: Cannot add user, users file does not exist");
+
+        PrintWriter writer = new PrintWriter(new FileWriter(usersfile, true));
+        writer.append(new_user.getUsername() + ":" + new_user.getPassword() + "\n");
+
+        writer.close();
     }
 
     public synchronized static ArrayList<Account> getUsers()
@@ -71,37 +99,11 @@ public class FilesManager {
         return userlist;
     }
 
-    public synchronized static void addUserToFile(Account new_user)
-            throws IOException {
-
-        if (new_user == null)
-            throw new IllegalArgumentException();
-
-        File usersfile = new File(USERS_FILE_PATH);
-
-        if (!usersfile.exists())
-            throw new FileNotFoundException("[File not found]: Cannot add user, users file does not exist");
-
-        PrintWriter writer = new PrintWriter(new FileWriter(usersfile, true));
-        writer.append(new_user.getUsername() + ":" + new_user.getPassword() + "\n");
-
-        writer.close();
-    }
-
-    public synchronized static boolean dirExist(String username)
-            throws IllegalArgumentException {
-
-        if (username == null)
-            throw new IllegalArgumentException();
-
-        return Files.exists(Paths.get(USERS_DIR_PATH + username));
-    }
-
     // Mailboxes methods
-    public synchronized static ArrayList<Mail> getMailBox(String mbox_name, String username)
+    public synchronized static ArrayList<Mail> getMailBox(String mailbox_name, String username)
             throws IOException {
 
-        if (mbox_name == null || username == null)
+        if (mailbox_name == null || username == null)
             throw new IllegalArgumentException();
 
         String line = null;
@@ -109,15 +111,15 @@ public class FilesManager {
         ArrayList<Mail> mailbox = new ArrayList<>();
 
         // Check for user directory exists
-        File userDir = new File(USERS_DIR_PATH + username);
-        if (!(userDir.exists()))
+        if (!dirExist(username))
             throw new FileNotFoundException("[File not found]: Impossible to get Mailbox");
 
         // Check for requested file exist
-        File mbox = new File(USERS_DIR_PATH + username + "/" + mbox_name + ".txt");
+        File mbox = new File(USERS_DIR_PATH + username + "/" + mailbox_name + ".txt");
         if (!(mbox.exists()))
             mbox.createNewFile();
 
+        // If mailbox is empty
         if (mbox.length() == 0)
             return null;
 
@@ -128,7 +130,7 @@ public class FilesManager {
         Mail actMail = null;
         while ((line = buff.readLine()) != null) {
             actMail = new Mail();
-            actMail.setBelonging(mbox_name);
+            actMail.setBelonging(mailbox_name);
 
             String[] splitted = line.split(":");
 

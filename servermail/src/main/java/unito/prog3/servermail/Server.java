@@ -8,8 +8,12 @@ import unito.prog3.utils.FilesManager;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import static unito.prog3.utils.FilesManager.USERS_DIR_PATH;
 
 public class Server implements Runnable {
 
@@ -83,6 +87,14 @@ public class Server implements Runnable {
             FilesManager.insMailToMailbox(dest, msg);
         }
         return "OK";
+    }
+
+    public void setupFiles() throws IOException {
+        // Check for main dir files
+        if (!(Files.exists(Paths.get(USERS_DIR_PATH)))) {
+            // Creating 'files' dir
+            Files.createDirectories(Paths.get(USERS_DIR_PATH));
+        }
     }
 
     @Override

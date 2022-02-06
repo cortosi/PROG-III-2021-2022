@@ -28,10 +28,11 @@
     -fx-background-color: #FFFFFF;
     -fx-background-radius: 15;
     -fx-border-radius: 15;
+    -fx-border-width: 2px;
 }
 
 .login-wrong-input,
-.signup-wrong-input{
+.signup-wrong-input {
     -fx-text-fill: red;
     -fx-font-weight: bold;
 }
@@ -60,7 +61,7 @@
 .login-form-input,
 .signup-form-input {
     -fx-prompt-text-fill: rgba(118, 118, 123, 0.6);
-    -fx-font-size:  1.6em;
+    -fx-font-size: 1.6em;
     -fx-background-color: #FFFFFF;
     -fx-text-box-border: hidden;
     -fx-background-radius: 15;
@@ -72,7 +73,7 @@
     -fx-border-style: hidden hidden hidden hidden;
 }
 
-.signup-form-domain{
+.signup-form-domain {
     -fx-font-size: 1.4em;
     -fx-font-weight: bold;
     -fx-text-fill: #495057;
@@ -92,6 +93,11 @@
 .wrong-input {
     -fx-text-fill: rgba(206, 50, 71, 0.8);
     -fx-alignment: center;
+}
+
+.login_now,
+.signup_now {
+    -fx-font-weight: bold;
 }
 
 /* TopBar */
