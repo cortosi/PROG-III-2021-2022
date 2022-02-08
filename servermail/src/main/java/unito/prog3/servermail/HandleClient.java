@@ -129,12 +129,13 @@ public class HandleClient implements Runnable {
     public void waitMailbox()
             throws Exception {
 
+        ArrayList<Mail> mail = null;
         Object obj = in.readObject();
 
         if (!(obj instanceof String mailbox))
             throw new InvalidObjectException("[Invalid Object]: String required for mailbox mail");
 
-        ArrayList<Mail> mail = FilesManager.getMailBox(mailbox, clientAcc.getUsername());
+        mail = FilesManager.getMailBox(clientAcc.getUsername(), mailbox);
 
         clientAcc.setMessages(mail);
     }
@@ -154,7 +155,7 @@ public class HandleClient implements Runnable {
 
     // Mail Moving
     public void waitMailToMove()
-            throws IOException, ClassNotFoundException {
+            throws Exception {
         // Getting message from client
         Object obj = in.readObject();
 
@@ -166,7 +167,7 @@ public class HandleClient implements Runnable {
 
     // Mail Delete
     public void waitMailToDelete()
-            throws IOException, ClassNotFoundException {
+            throws Exception {
         // Getting message from client
         Object obj = in.readObject();
 
@@ -207,7 +208,8 @@ public class HandleClient implements Runnable {
                                     waitMailbox();
                                     out.writeObject(clientAcc.getMessages());
                                 } catch (Exception e) {
-                                    e.printStackTrace();
+                                    System.out.println(
+                                            "[" + Thread.currentThread() + "]: ERROR: " + e.getMessage());
                                 }
                             }
                             case SEND_MSG -> {
@@ -225,6 +227,11 @@ public class HandleClient implements Runnable {
                                         "[" + Thread.currentThread() + "]: Deleting Message...");
                                 waitMailToDelete();
                             }
+                            case REPLY_REQ -> {
+                                System.out.println(
+                                        "[" + Thread.currentThread() + "]: Reply Message...");
+                                waitMailToDelete();
+                            }
                         }
                     } else
                         throw new InvalidObjectException("[Invalid Object]: ServerAPI required");
@@ -233,11 +240,13 @@ public class HandleClient implements Runnable {
             } catch (IllegalArgumentException e) {
                 System.out.println(e.getMessage());
             } catch (IOException e) {
-                System.out.println(e.getMessage());
-                e.printStackTrace();
+                System.out.println(
+                        "[" + Thread.currentThread() + "]: CLIENT DISCONNECTED");
                 exit = true;
             } catch (ClassNotFoundException e) {
                 System.out.println("Illegal class sent");
+                e.printStackTrace();
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }

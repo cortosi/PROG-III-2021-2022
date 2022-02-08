@@ -9,17 +9,22 @@ public class Mail implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    private int id;
     private String source;
     private String object;
     private String content;
     private String belonging = "inbox";
-    private String moveto;
+    private String moveto = "inbox";
     private ArrayList<String> dests;
     private boolean read = false;
     private Date date;
 
     public Mail() {
 
+    }
+
+    public int getId() {
+        return id;
     }
 
     public Date getDate() {
@@ -82,6 +87,10 @@ public class Mail implements Serializable {
         this.date = date;
     }
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public String destsToString() {
         // <dst1:dst2:...>
         String res = "<";
@@ -93,10 +102,16 @@ public class Mail implements Serializable {
 
     @Override
     public String toString() {
-        // src:title:<dst1:dst2>:content
-        return source + ':' +
-                object + ':' +
-                destsToString() + ':' +
-                content;
+        return "Mail{" +
+                "id=" + id +
+                ", source='" + source + '\'' +
+                ", object='" + object + '\'' +
+                ", content='" + content + '\'' +
+                ", belonging='" + belonging + '\'' +
+                ", moveto='" + moveto + '\'' +
+                ", dests=" + dests +
+                ", read=" + read +
+                ", date=" + date +
+                '}';
     }
 }

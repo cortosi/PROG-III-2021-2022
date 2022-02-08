@@ -1,5 +1,8 @@
 package unito.prog3.utils;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import unito.prog3.models.Account;
 import unito.prog3.models.Mail;
@@ -7,10 +10,7 @@ import unito.prog3.models.Mail;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -59,192 +59,197 @@ public class FilesManager {
         return Files.exists(Paths.get(USERS_DIR_PATH + username));
     }
 
-    public static void addUserToFile(Account new_user)
+    public static boolean addUserToFile(Account new_user)
             throws IOException {
 
-        JSONObject jsonObj = null;
-        String jsonParsed = null;
+        JSONObject json = null;
+        JSONArray values = null;
 
         if (new_user == null)
             throw new IllegalArgumentException();
 
-        File usersfile = new File(USERS_FILE_PATH);
+        ArrayList<Account> accounts = getUsers();
 
-        if (!usersfile.exists())
-            throw new FileNotFoundException("[File not found]: Cannot add user, users file does not exist");
-
-        synchronized (FILE_LOCKS.computeIfAbsent(usersfile, k -> new ReentrantLock())) {
-            PrintWriter writer = new PrintWriter(new FileWriter(usersfile, true));
-            writer.append(new_user.getUsername() + ":" + new_user.getPassword() + "\n");
-            writer.close();
+        for (Account acc : accounts) {
+            if (acc.getUsername().equals(new_user.getUsername())) {
+                return false;
+            }
         }
+        accounts.add(new_user);
+
+        new ObjectMapper().writeValue(new File(USERS_FILE_PATH), accounts);
+
+        return true;
     }
 
     public static ArrayList<Account> getUsers()
             throws IOException {
-        String line = null;
 
-        File usersFile = new File(USERS_FILE_PATH);
+        ObjectMapper mapper = new ObjectMapper();
+        ArrayList<Account> users;
 
-        // Check for users empty
-        if (usersFile.length() == 0)
-            return null;
+        File json = new File(USERS_FILE_PATH);
 
-        // If not empty, extract all users
-        BufferedReader buff = new BufferedReader(new FileReader(usersFile));
-
-        ArrayList<Account> userlist = new ArrayList<>();
-
-        // Loop over lines and
-        while ((line = buff.readLine()) != null) {
-            String[] splitted = line.split(":");
-
-            userlist.add(new Account(splitted[0], splitted[1]));
+        try {
+            users = mapper.readValue(json, new TypeReference<>() {
+            });
+        } catch (IOException e) {
+            users = new ArrayList<>();
         }
 
-        // Closing buffers
-        buff.close();
-
-        return userlist;
+        return users;
     }
 
     // Mailboxes methods
-    public static ArrayList<Mail> getMailBox(String mailbox_name, String username)
+    public static ArrayList<Mail> getMailBox(String username, String mailbox_name)
             throws IOException {
+
+        ObjectMapper mapper = new ObjectMapper();
+        ArrayList<Mail> mailbox;
 
         if (mailbox_name == null || username == null)
             throw new IllegalArgumentException();
 
-        String line = null;
+        File json = new File(USERS_DIR_PATH + username + "/" + mailbox_name + ".txt");
 
-        ArrayList<Mail> mailbox = new ArrayList<>();
-
-        // Check for user directory exists
-        if (!dirExist(username))
-            throw new FileNotFoundException("[File not found]: Impossible to get Mailbox");
-
-        // Check for requested file exist
-        File mbox = new File(USERS_DIR_PATH + username + "/" + mailbox_name + ".txt");
-        if (!(mbox.exists()))
-            mbox.createNewFile();
-
-        // If mailbox is empty
-        if (mbox.length() == 0)
-            return null;
-
-        // If not empty, extract all users
-        BufferedReader buff = new BufferedReader(new FileReader(mbox));
-
-        synchronized (FILE_LOCKS.computeIfAbsent(mbox, k -> new ReentrantLock())) {
-            // Loop over lines
-            Mail actMail = null;
-            while ((line = buff.readLine()) != null) {
-                actMail = new Mail();
-                actMail.setBelonging(mailbox_name);
-
-                String[] splitted = line.split(":");
-
-                actMail.setSource(splitted[0]);
-                actMail.setObject(splitted[1]);
-                actMail.setContent(splitted[splitted.length - 1]);
-
-                String[] destSplit = splitted[2].replaceAll("[<>]", "").split(",");
-
-                actMail.setDests(new ArrayList<>(Arrays.asList(destSplit)));
-
-                mailbox.add(actMail);
-            }
+        try {
+            mailbox = mapper.readValue(json, new TypeReference<>() {
+            });
+        } catch (IOException e) {
+            mailbox = new ArrayList<>();
         }
-
-        // Closing buffers
-        buff.close();
-
         return mailbox;
     }
 
-    public static void rmMailFromMailbox(String owner, Mail toremove)
-            throws IOException {
+    public static void rmMailFromMailbox(String user, Mail toRemove)
+            throws Exception {
 
-        if (owner == null || toremove == null)
+        boolean removed = false;
+        ObjectMapper mapper = new ObjectMapper();
+        ArrayList<Mail> mailBox;
+
+        if (toRemove == null || user == null)
             throw new IllegalArgumentException();
 
-        String mailboxName = toremove.getBelonging();
-        String lineToRemove = toremove.toString();
+        File json = new File(USERS_DIR_PATH + user + "/" + toRemove.getBelonging() + ".txt");
 
-        // Creating new file
-        String aux_path = USERS_DIR_PATH + owner + mailboxName + "_n.txt";
-        File newMailbox = new File(aux_path);
+        synchronized (FILE_LOCKS.computeIfAbsent(json, k -> new ReentrantLock())) {
+            try {
+                mailBox = mapper.readValue(json, new TypeReference<>() {
+                });
+            } catch (IOException e) {
+                mailBox = new ArrayList<>();
+            }
+            for (int i = 0; i < mailBox.size() && !removed; i++) {
+                if (mailBox.get(i).getId() == toRemove.getId()) {
+                    mailBox.remove(i);
+                    removed = true;
+                }
+            }
+            if (removed)
+                new ObjectMapper().writeValue(json, mailBox);
+            else
+                throw new Exception("Email Not found");
+        }
+    }
 
-        // Building mailbox path
-        File oldMailbox = new File(USERS_DIR_PATH + owner + "/" + mailboxName + ".txt");
+    public static void insMailToMailbox(String user, Mail toInsert)
+            throws IOException {
 
-        BufferedReader oldMailboxBuff = new BufferedReader(new FileReader(oldMailbox));
-        BufferedWriter newMailboxBuff = new BufferedWriter(new FileWriter(newMailbox));
+        ObjectMapper mapper = new ObjectMapper();
+        ArrayList<Mail> mailBox = new ArrayList<>();
 
-        synchronized (FILE_LOCKS.computeIfAbsent(oldMailbox, k -> new ReentrantLock())) {
-            String line = null;
-            while ((line = oldMailboxBuff.readLine()) != null) {
-                if (!line.equals(lineToRemove)) {
-                    newMailboxBuff.write(line);
-                    newMailboxBuff.newLine();
+        if (toInsert == null || user == null)
+            throw new IllegalArgumentException();
+
+        try {
+            toInsert.setId(getNextID(user));
+        } catch (IOException e) {
+            toInsert.setId(0);
+        }
+        toInsert.setBelonging(toInsert.getMoveto());
+
+        File json = new File(USERS_DIR_PATH + user + "/" + toInsert.getMoveto() + ".txt");
+
+        synchronized (FILE_LOCKS.computeIfAbsent(json, k -> new ReentrantLock())) {
+            try {
+                mailBox = mapper.readValue(json, new TypeReference<>() {
+                });
+            } catch (IOException e) {
+                mailBox = new ArrayList<>();
+            }
+
+            for (int i = 0; i < mailBox.size(); i++) {
+                if (mailBox.get(i).getId() == toInsert.getId()) {
+                    mailBox.set(i, toInsert);
+                    return;
                 }
             }
 
-            newMailboxBuff.close();
-            oldMailboxBuff.close();
-
-            oldMailbox.delete();
-            newMailbox.renameTo(oldMailbox);
+            mailBox.add(toInsert);
+            new ObjectMapper().writeValue(json, mailBox);
         }
+
+        setNewID(user, toInsert.getId());
     }
 
-    public static void insMailToMailbox(String owner, Mail toinsert)
+    public static void addSentMail(String user, Mail toInsert)
             throws IOException {
 
-        if (toinsert == null || owner == null)
+        if (toInsert == null || user == null)
             throw new IllegalArgumentException();
 
-        // Building file dest
-        File dest = new File(USERS_DIR_PATH + owner + "/" + toinsert.getMoveto() + ".txt");
+        ArrayList<Mail> sentMailBox = new ArrayList<>();
+        File destFile = new File(USERS_DIR_PATH + user + "/sent.txt");
 
-        synchronized (FILE_LOCKS.computeIfAbsent(dest, k -> new ReentrantLock())) {
-            PrintWriter writer = new PrintWriter(new FileWriter(dest, true));
-            writer.append(toinsert + "\n");
-
-            //
-            writer.close();
+        synchronized (FILE_LOCKS.computeIfAbsent(destFile, k -> new ReentrantLock())) {
+            sentMailBox = getMailBox(user, "sent");
+            sentMailBox.add(toInsert);
+            new ObjectMapper().writeValue(destFile, sentMailBox);
         }
     }
 
-    public static void addSentMail(String owner, Mail toinsert)
-            throws IOException {
+    public static void moveMail(String user, Mail toMove)
+            throws Exception {
 
-        if (toinsert == null || owner == null)
-            throw new IllegalArgumentException();
-
-        // Building file dest
-        File dest = new File(USERS_DIR_PATH + owner + "/sent.txt");
-
-        synchronized (FILE_LOCKS.computeIfAbsent(dest, k -> new ReentrantLock())) {
-            PrintWriter writer = new PrintWriter(new FileWriter(dest, true));
-            writer.append(toinsert + "\n");
-
-            //
-            writer.close();
-        }
-    }
-
-    public static void moveMail(String owner, Mail tomove)
-            throws IOException {
-
-        if (tomove == null)
+        if (toMove == null)
             throw new IllegalArgumentException();
 
         // Remove mail from source file
-        rmMailFromMailbox(owner, tomove);
+        rmMailFromMailbox(user, toMove);
 
         // Adding mail to dest file
-        insMailToMailbox(owner, tomove);
+        insMailToMailbox(user, toMove);
+    }
+
+    public static int getNextID(String user) throws IOException {
+        File json = new File(USERS_FILE_PATH);
+
+        ArrayList<Account> users = new ObjectMapper().readValue(json, new TypeReference<>() {
+        });
+
+        for (Account acc : users) {
+            if (acc.getUsername().equals(user))
+                return acc.getReceived() + 1;
+        }
+
+        return 0;
+    }
+
+    public static void setNewID(String user, int newID) throws IOException {
+        File json = new File(USERS_FILE_PATH);
+        boolean found = false;
+        ArrayList<Account> users = new ObjectMapper().readValue(json, new TypeReference<>() {
+        });
+
+        for (int i = 0; i < users.size() && !found; i++) {
+            if (users.get(i).getUsername().equals(user)) {
+                users.get(i).setReceived(newID);
+                found = true;
+            }
+        }
+
+        new ObjectMapper().writeValue(json, users);
     }
 }
 

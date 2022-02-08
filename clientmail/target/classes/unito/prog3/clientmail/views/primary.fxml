@@ -57,7 +57,7 @@
                     <center>
                         <VBox prefHeight="500.0" prefWidth="460.0" styleClass="test" stylesheets="@../style/Style.css" BorderPane.alignment="CENTER">
                             <children>
-                                <HBox alignment="CENTER_RIGHT" prefHeight="44.0" prefWidth="501.0" styleClass="main-content-head" stylesheets="@../style/Style.css">
+                                <HBox fx:id="main_content_head" alignment="CENTER_RIGHT" prefHeight="44.0" prefWidth="501.0" styleClass="main-content-head" stylesheets="@../style/Style.css" visible="false">
                                     <children>
                                         <ImageView fx:id="junk_btn" fitHeight="33.0" fitWidth="42.0" pickOnBounds="true" preserveRatio="true" HBox.hgrow="ALWAYS">
                                             <image>
@@ -67,7 +67,7 @@
                                                 <Cursor fx:constant="HAND" />
                                             </cursor>
                                         </ImageView>
-                                        <ImageView fx:id="junk_btn1" fitHeight="33.0" fitWidth="42.0" pickOnBounds="true" preserveRatio="true">
+                                        <ImageView fx:id="reply_btn" fitHeight="33.0" fitWidth="42.0" pickOnBounds="true" preserveRatio="true">
                                             <image>
                                                 <Image url="@../imgs/reply.png" />
                                             </image>
@@ -210,7 +210,7 @@
                                         <Cursor fx:constant="HAND" />
                                     </cursor>
                                 </ImageView>
-                                <Label fx:id="head_username" prefHeight="22.0" prefWidth="81.0" styleClass="head-username" text="Vittorio" />
+                                <Label fx:id="head_username" prefHeight="23.0" styleClass="head-username" />
                                 <ImageView fitHeight="11.0" fitWidth="14.0" pickOnBounds="true" preserveRatio="true">
                                     <image>
                                         <Image url="@../imgs/arrowdown.png" />

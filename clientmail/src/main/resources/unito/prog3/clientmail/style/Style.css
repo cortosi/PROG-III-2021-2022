@@ -116,6 +116,7 @@
 /* Folders Section */
 
 .folders-section-wrap {
+    -fx-background-color: #f8f8fc;
 }
 
 .folders-section {
@@ -145,6 +146,7 @@
 /* Main Content */
 
 .main-content {
+    -fx-background-color: #ffffff;
 }
 
 /* Side Section */
@@ -167,7 +169,8 @@
 }
 
 .selected-mail-list-wrap {
-    -fx-background-color: transparent;
+    -fx-background: #FFFFFF;
+    -fx-border-color: #FFFFFF;
 }
 
 /* MailBox List */
@@ -233,6 +236,8 @@
 
 .empty-msg-list {
     -fx-padding: 10 0;
+    -fx-background-color: #ffffff;
+    -fx-background: transparent;
 }
 
 .empty-msg-list-description {
@@ -251,7 +256,7 @@
 
 .mail-content {
     -fx-background-radius: 10;
-    -fx-background-color: #f4f4f4;
+    -fx-background-color: #ffffff;
     -fx-padding: 0 15;
     -fx-font-size: 1.4em;
 }
@@ -368,4 +373,39 @@
 .no-selected-mail-desc {
     -fx-font-size: 2em;
     -fx-text-fill: #495057;
+}
+
+.reply-box-wrap {
+    -fx-background-color: #f5f5f5;
+    -fx-background-radius: 10;
+}
+
+.reply-box {
+    -fx-padding: 5;
+}
+
+.reply-box-head {
+    -fx-border-style: hidden hidden solid hidden;
+    -fx-border-color: #E4E4E6;
+}
+
+.reply-box-mailtitle {
+    -fx-font-size: 1.4em;
+    -fx-font-weight: bold;
+    -fx-text-fill: #76767B;
+}
+
+.reply-box-mailsender {
+    -fx-font-size: 1.7em;
+    -fx-font-weight: bold;
+}
+
+.reply-box-item {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 10;
+}
+
+.reply-box-item-desc{
+    -fx-text-fill: #0071eb;
+    -fx-font-weight: bold;
 }

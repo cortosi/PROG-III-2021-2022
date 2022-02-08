@@ -6,6 +6,7 @@ public enum Protocol {
     MAILBOX_LIST,
     SEND_MSG,
     MOVE_REQ,
-    DEL_REQ
+    DEL_REQ,
+    REPLY_REQ
 }
 

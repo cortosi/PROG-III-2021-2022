@@ -29,8 +29,9 @@ import unito.prog3.utils.Security;
 public class Controller {
 
     //
-    Account my_acc;
-    ArrayList<Mail> msglist;
+    private Account my_acc;
+    private ArrayList<Mail> msglist;
+    private Mail actMail;
 
     // Connection Interface
     private Connection connection;
@@ -63,6 +64,9 @@ public class Controller {
     private final emptyMailbox empty_msg_list = new emptyMailbox();
 
     //FXML Objs
+    @FXML
+    private HBox main_content_head;
+
     @FXML
     private HBox folder_item;
 
@@ -414,6 +418,7 @@ public class Controller {
     public void clearMailToShow() {
         no_selected_mail_wrap.setVisible(false);
         mail_content.setVisible(true);
+        main_content_head.setVisible(true);
 
         //
         mail_head_sender_icon.setText("");
@@ -422,6 +427,12 @@ public class Controller {
         mail_content_date.setText("");
         mail_content_title.setText("");
         mail_description.setText("");
+    }
+
+    // Reply
+    @FXML
+    public void mailReply() {
+
     }
 
     @FXML
@@ -520,11 +531,12 @@ public class Controller {
             }
         }
 
-        private void getMailboxList() throws IOException, ClassNotFoundException {
+        private void getMailboxList()
+                throws IOException, ClassNotFoundException {
             //Saving msg list
             msglist = connection.mailListRequest(mailbox);
 
-            if (msglist == null) {
+            if (msglist == null || msglist.size() == 0) {
                 showEmptySection();
             } else {
                 Platform.runLater(() -> {
@@ -802,7 +814,6 @@ public class Controller {
             new_mail.setDests(dests);
             new_mail.setObject(object);
             new_mail.setContent(content);
-            new_mail.setMoveto("inbox");
 
             // Sending Mail..
             String res = connection.sendMessage(new_mail);
@@ -875,17 +886,27 @@ public class Controller {
             Platform.runLater(() -> {
                 clearMailToShow();
                 fillMailContent();
+                actMail = toShow;
             });
         }
 
         private void fillMailContent() {
-            System.out.println(toShow.toString());
             mail_head_sender_icon.setText(toShow.getSource().charAt(0) + "");
             mail_content_title.setText(toShow.getObject());
             mail_content_to.setText(toShow.getDests().toString());
 //            mail_content_date.setText(toShow.getDate().toString());
             mail_content_title.setText(toShow.getObject());
             mail_description.setText(toShow.getContent());
+        }
+    }
+
+    public class replyThread implements Runnable {
+
+        private boolean all = false;
+
+        @Override
+        public void run() {
+
         }
     }
 }

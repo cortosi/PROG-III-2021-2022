@@ -57,7 +57,7 @@
                     <center>
                         <VBox prefHeight="500.0" prefWidth="460.0" styleClass="test" stylesheets="@../style/Style.css" BorderPane.alignment="CENTER">
                             <children>
-                                <HBox alignment="CENTER_RIGHT" prefHeight="44.0" prefWidth="501.0" styleClass="main-content-head" stylesheets="@../style/Style.css">
+                                <HBox fx:id="main_content_head" alignment="CENTER_RIGHT" prefHeight="44.0" prefWidth="501.0" styleClass="main-content-head" stylesheets="@../style/Style.css">
                                     <children>
                                         <ImageView fx:id="junk_btn" fitHeight="33.0" fitWidth="42.0" pickOnBounds="true" preserveRatio="true" HBox.hgrow="ALWAYS">
                                             <image>
@@ -67,7 +67,7 @@
                                                 <Cursor fx:constant="HAND" />
                                             </cursor>
                                         </ImageView>
-                                        <ImageView fx:id="junk_btn1" fitHeight="33.0" fitWidth="42.0" pickOnBounds="true" preserveRatio="true">
+                                        <ImageView fx:id="reply_btn" fitHeight="33.0" fitWidth="42.0" onMouseClicked="#mailReply" pickOnBounds="true" preserveRatio="true">
                                             <image>
                                                 <Image url="@../imgs/reply.png" />
                                             </image>
@@ -77,9 +77,9 @@
                                         </ImageView>
                                     </children>
                                 </HBox>
-                                <AnchorPane fx:id="mail_content_outer" prefHeight="464.0" prefWidth="460.0" styleClass="mail-content-outer" stylesheets="@../style/Style.css" VBox.vgrow="ALWAYS">
+                                <AnchorPane fx:id="mail_content_outer" prefHeight="464.0" prefWidth="460.0" styleClass="mail-content-outer" VBox.vgrow="ALWAYS">
                                     <children>
-                              <VBox fx:id="no_selected_mail_wrap" alignment="CENTER" layoutX="51.0" layoutY="14.0" prefHeight="200.0" prefWidth="100.0" styleClass="no-selected-mail-wrap" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                              <VBox fx:id="no_selected_mail_wrap" alignment="CENTER" layoutX="51.0" layoutY="14.0" prefHeight="200.0" prefWidth="100.0" styleClass="no-selected-mail-wrap" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                  <children>
                                     <Label styleClass="no-selected-mail-desc" text="No Selected Mail" />
                                  </children>
@@ -121,6 +121,92 @@
                                                 </DropShadow>
                                             </effect>
                                         </AnchorPane>
+                              <AnchorPane prefHeight="279.0" prefWidth="200.0" styleClass="reply-box-wrap" stylesheets="@../style/Style.css" AnchorPane.rightAnchor="0.0">
+                                 <effect>
+                                    <DropShadow blurType="GAUSSIAN" height="5.0" radius="2.0" spread="0.75" width="5.0">
+                                       <color>
+                                          <Color opacity="0.23999999463558197" />
+                                       </color>
+                                    </DropShadow>
+                                 </effect>
+                                 <children>
+                                    <VBox prefHeight="200.0" prefWidth="100.0" spacing="10.0" styleClass="reply-box" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                       <children>
+                                          <HBox alignment="CENTER_LEFT" prefHeight="62.0" prefWidth="200.0" spacing="6.0" styleClass="reply-box-head">
+                                             <children>
+                                                <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="50.0" prefWidth="50.0" styleClass="mail-head-sender-icon" textAlignment="CENTER" />
+                                                <VBox alignment="CENTER_LEFT" prefHeight="60.0" prefWidth="132.0" HBox.hgrow="ALWAYS">
+                                                   <children>
+                                                      <Label styleClass="reply-box-mailsender" />
+                                                      <Label styleClass="reply-box-mailtitle" />
+                                                   </children>
+                                                </VBox>
+                                             </children>
+                                          </HBox>
+                                          <HBox alignment="CENTER" prefHeight="91.0" prefWidth="190.0" spacing="5.0">
+                                             <children>
+                                                <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" styleClass="reply-box-item">
+                                                   <children>
+                                                      <ImageView fitHeight="45.0" fitWidth="45.0" pickOnBounds="true" preserveRatio="true">
+                                                         <image>
+                                                            <Image url="@../imgs/reply2.png" />
+                                                         </image>
+                                                      </ImageView>
+                                                      <Label styleClass="reply-box-item-desc" text="Reply" />
+                                                   </children>
+                                                   <cursor>
+                                                      <Cursor fx:constant="HAND" />
+                                                   </cursor>
+                                                </VBox>
+                                                <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" styleClass="reply-box-item">
+                                                   <children>
+                                                      <ImageView fitHeight="45.0" fitWidth="45.0" pickOnBounds="true" preserveRatio="true">
+                                                         <image>
+                                                            <Image url="@../imgs/replyall.png" />
+                                                         </image>
+                                                      </ImageView>
+                                                      <Label styleClass="reply-box-item-desc" text="ReplyAll" />
+                                                   </children>
+                                                   <cursor>
+                                                      <Cursor fx:constant="HAND" />
+                                                   </cursor>
+                                                </VBox>
+                                             </children>
+                                          </HBox>
+                                          <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="5.0">
+                                             <children>
+                                                <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" styleClass="reply-box-item">
+                                                   <children>
+                                                      <ImageView fitHeight="45.0" fitWidth="45.0" pickOnBounds="true" preserveRatio="true">
+                                                         <image>
+                                                            <Image url="@../imgs/forward.png" />
+                                                         </image>
+                                                      </ImageView>
+                                                      <Label styleClass="reply-box-item-desc" text="Forward" />
+                                                   </children>
+                                                   <cursor>
+                                                      <Cursor fx:constant="HAND" />
+                                                   </cursor>
+                                                </VBox>
+                                                <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" styleClass="reply-box-item">
+                                                   <children>
+                                                      <ImageView fitHeight="45.0" fitWidth="45.0" pickOnBounds="true" preserveRatio="true">
+                                                         <image>
+                                                            <Image url="@../imgs/trash2.png" />
+                                                         </image>
+                                                      </ImageView>
+                                                      <Label styleClass="reply-box-item-desc" text="Delete" />
+                                                   </children>
+                                                   <cursor>
+                                                      <Cursor fx:constant="HAND" />
+                                                   </cursor>
+                                                </VBox>
+                                             </children>
+                                          </HBox>
+                                       </children>
+                                    </VBox>
+                                 </children>
+                              </AnchorPane>
                                     </children>
                                 </AnchorPane>
                             </children>
@@ -210,7 +296,7 @@
                                         <Cursor fx:constant="HAND" />
                                     </cursor>
                                 </ImageView>
-                                <Label fx:id="head_username" prefHeight="22.0" prefWidth="81.0" styleClass="head-username" text="Vittorio" />
+                                <Label fx:id="head_username" prefHeight="23.0" styleClass="head-username" />
                                 <ImageView fitHeight="11.0" fitWidth="14.0" pickOnBounds="true" preserveRatio="true">
                                     <image>
                                         <Image url="@../imgs/arrowdown.png" />
@@ -276,7 +362,7 @@
                 </HBox>
             </children>
         </AnchorPane>
-        <AnchorPane fx:id="login_outer" prefHeight="726.0" prefWidth="1165.0" styleClass="signup-outer" stylesheets="@../style/Style.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <AnchorPane fx:id="login_outer" prefHeight="726.0" prefWidth="1165.0" styleClass="signup-outer" stylesheets="@../style/Style.css" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <children>
                 <HBox alignment="CENTER" layoutY="7.0" prefHeight="726.0" prefWidth="1165.0" AnchorPane.bottomAnchor="-7.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="7.0">
                     <children>
