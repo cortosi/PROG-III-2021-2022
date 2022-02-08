@@ -11,9 +11,9 @@ public class Mail implements Serializable {
 
     private String source;
     private String object;
+    private String content;
     private String belonging = "inbox";
     private String moveto;
-    private String content;
     private ArrayList<String> dests;
     private boolean read = false;
     private Date date;

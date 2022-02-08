@@ -9,17 +9,22 @@ public class Mail implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    private int id;
     private String source;
     private String object;
+    private String content;
     private String belonging = "inbox";
     private String moveto;
-    private String content;
     private ArrayList<String> dests;
     private boolean read = false;
     private Date date;
 
     public Mail() {
 
+    }
+
+    public int getId() {
+        return id;
     }
 
     public Date getDate() {

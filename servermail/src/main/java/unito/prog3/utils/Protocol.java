@@ -1,10 +1,11 @@
 package unito.prog3.utils;
 
-public enum ServerAPI {
+public enum Protocol {
     LOGIN_REQUEST,
     REG_REQUEST,
     MAILBOX_LIST,
     SEND_MSG,
-    MOVE_REQ
+    MOVE_REQ,
+    DEL_REQ
 }
 

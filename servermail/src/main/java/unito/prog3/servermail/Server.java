@@ -5,6 +5,7 @@ import unito.prog3.models.Account;
 import unito.prog3.models.Mail;
 import unito.prog3.utils.FilesManager;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -69,6 +70,9 @@ public class Server implements Runnable {
 
     public String sendMail(Mail msg)
             throws IOException {
+        // Save mail into sent mailbox
+        FilesManager.addSentMail(msg.getSource(), msg);
+
         // src:title:<dst1:dst2>:content
         if (msg == null)
             throw new IllegalArgumentException();

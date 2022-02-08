@@ -3,7 +3,7 @@ package unito.prog3.servermail;
 import unito.prog3.models.Account;
 import unito.prog3.models.Mail;
 import unito.prog3.utils.FilesManager;
-import unito.prog3.utils.ServerAPI;
+import unito.prog3.utils.Protocol;
 
 import java.io.IOException;
 import java.io.InvalidObjectException;
@@ -164,6 +164,18 @@ public class HandleClient implements Runnable {
         FilesManager.moveMail(clientAcc.getUsername(), tomove);
     }
 
+    // Mail Delete
+    public void waitMailToDelete()
+            throws IOException, ClassNotFoundException {
+        // Getting message from client
+        Object obj = in.readObject();
+
+        if (!(obj instanceof Mail toDelete))
+            throw new InvalidObjectException("[Invalid Object]: Mail required for moving");
+
+        FilesManager.rmMailFromMailbox(clientAcc.getUsername(), toDelete);
+    }
+
     @Override
     public synchronized void run() {
         // Thread Name
@@ -176,8 +188,8 @@ public class HandleClient implements Runnable {
             Object read = null;
             try {
                 if ((read = in.readObject()) != null) {
-                    if (read instanceof ServerAPI) {
-                        switch ((ServerAPI) read) {
+                    if (read instanceof Protocol) {
+                        switch ((Protocol) read) {
                             case REG_REQUEST -> {
                                 System.out.println(
                                         "[" + Thread.currentThread() + "]: check signup data");
@@ -207,6 +219,11 @@ public class HandleClient implements Runnable {
                                 System.out.println(
                                         "[" + Thread.currentThread() + "]: Moving Message...");
                                 waitMailToMove();
+                            }
+                            case DEL_REQ -> {
+                                System.out.println(
+                                        "[" + Thread.currentThread() + "]: Deleting Message...");
+                                waitMailToDelete();
                             }
                         }
                     } else

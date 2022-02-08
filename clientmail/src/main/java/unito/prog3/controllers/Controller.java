@@ -3,6 +3,7 @@ package unito.prog3.controllers;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -63,10 +64,106 @@ public class Controller {
 
     //FXML Objs
     @FXML
-    private VBox selected_mail_list;
+    private HBox folder_item;
+
+    @FXML
+    private AnchorPane folders_section;
+
+    @FXML
+    private VBox folders_section_folderlist;
+
+    @FXML
+    private Label folders_section_title;
+
+    @FXML
+    private StackPane folders_section_wrap;
 
     @FXML
     private Label head_username;
+
+    @FXML
+    private ImageView junk_btn;
+
+    @FXML
+    private ImageView junk_btn1;
+
+    @FXML
+    private HBox junk_items;
+
+    @FXML
+    private Pane login_loader;
+
+    @FXML
+    private AnchorPane login_logo_wrap;
+
+    @FXML
+    private TextField login_net_field;
+
+    @FXML
+    private AnchorPane login_outer;
+
+    @FXML
+    private TextField login_psw_field;
+
+    @FXML
+    private ImageView login_submit_btn;
+
+    @FXML
+    private TextField login_usr_field;
+
+    @FXML
+    private Label login_wrong_input;
+
+    @FXML
+    private AnchorPane mail_content;
+
+    @FXML
+    private Label mail_content_date;
+
+    @FXML
+    private AnchorPane mail_content_outer;
+
+    @FXML
+    private Label mail_content_title;
+
+    @FXML
+    private Label mail_content_to;
+
+    @FXML
+    private Label mail_description;
+
+    @FXML
+    private VBox mail_description_outer;
+
+    @FXML
+    private ScrollPane mail_description_wrap;
+
+    @FXML
+    private HBox mail_head;
+
+    @FXML
+    private Label mail_head_sender_icon;
+
+    @FXML
+    private BorderPane main;
+
+    @FXML
+    private BorderPane main_content;
+
+    @FXML
+    private AnchorPane main_window;
+
+    @FXML
+    private ImageView new_mail_btn;
+
+    @FXML
+    private AnchorPane new_mail_outer;
+
+    @FXML
+    private VBox new_mail_wrap;
+
+    @FXML
+    private TextArea new_msg_content;
 
     @FXML
     private TextField new_msg_obj_datafield;
@@ -75,76 +172,55 @@ public class Controller {
     private ImageView new_msg_send_btn;
 
     @FXML
-    private TextArea new_msg_content;
+    private TextField new_msg_to_datafield;
 
     @FXML
-    private TextField new_msg_to_datafield;
+    private Label new_msg_undo;
+
+    @FXML
+    private VBox selected_mail_list;
 
     @FXML
     private Label selected_msg_n;
 
     @FXML
-    private Pane login_loader;
-
-    @FXML
-    private AnchorPane signup_logo_wrap;
-
-    @FXML
-    private AnchorPane login_logo_wrap;
-
-    @FXML
-    private Label show_signup_btn;
-
-    @FXML
-    private Label signup_wrong_input;
-
-    @FXML
-    private Label login_wrong_input;
-
-    @FXML
-    private ImageView login_submit_btn;
-
-    @FXML
-    private AnchorPane login_outer;
-
-    @FXML
-    private AnchorPane signup_outer;
-
-    @FXML
-    private TextField signup_usr_field;
-
-    @FXML
-    private TextField signup_psw_field;
-
-    @FXML
-    private TextField login_usr_field;
-
-    @FXML
-    private TextField login_psw_field;
-
-    @FXML
-    private TextField login_net_field;
-
-    @FXML
-    private BorderPane main;
-
-    @FXML
-    private VBox new_mail_wrap;
-
-    @FXML
-    private AnchorPane new_mail_outer;
-
-    @FXML
-    private AnchorPane main_window;
+    private HBox sent_item;
 
     @FXML
     private Label show_folders_btn;
 
     @FXML
-    private AnchorPane folders_section;
+    private Label show_login_btn;
 
     @FXML
-    private StackPane folders_section_wrap;
+    private Label show_signup_btn;
+
+    @FXML
+    private VBox side_section_mails;
+
+    @FXML
+    private AnchorPane signup_logo_wrap;
+
+    @FXML
+    private AnchorPane signup_outer;
+
+    @FXML
+    private TextField signup_psw_field;
+
+    @FXML
+    private ImageView signup_submit_btn;
+
+    @FXML
+    private TextField signup_usr_field;
+
+    @FXML
+    private Label signup_wrong_input;
+
+    @FXML
+    private HBox spam_item;
+
+    @FXML
+    private VBox no_selected_mail_wrap;
 
     // Login/Signup
     @FXML
@@ -335,6 +411,19 @@ public class Controller {
         new_msg_content.clear();
     }
 
+    public void clearMailToShow() {
+        no_selected_mail_wrap.setVisible(false);
+        mail_content.setVisible(true);
+
+        //
+        mail_head_sender_icon.setText("");
+        mail_content_title.setText("");
+        mail_content_to.setText("");
+        mail_content_date.setText("");
+        mail_content_title.setText("");
+        mail_description.setText("");
+    }
+
     @FXML
     public void initialize() {
         // Binding min/max to pref, to not allow the panes width change.
@@ -390,6 +479,10 @@ public class Controller {
             super();
             this.mailbind = tobind;
         }
+
+        public Mail getMailbind() {
+            return mailbind;
+        }
     }
 
     public class emptyMailbox extends StackPane {
@@ -431,8 +524,6 @@ public class Controller {
             //Saving msg list
             msglist = connection.mailListRequest(mailbox);
 
-            System.out.println(msglist);
-
             if (msglist == null) {
                 showEmptySection();
             } else {
@@ -467,25 +558,45 @@ public class Controller {
 
             // Sub Context menu
             final Menu move = new Menu("Move");
+            MenuItem inbox = new MenuItem("Inbox");
+            inbox.getStyleClass().addAll("mailbox-list-item-menu");
             MenuItem spam = new MenuItem("Spam");
             spam.getStyleClass().addAll("mailbox-list-item-menu");
             MenuItem trash = new MenuItem("Trash");
             trash.getStyleClass().addAll("mailbox-list-item-menu");
 
-            move.getItems().addAll(spam, trash);
+            move.getItems().addAll(inbox, spam, trash);
             move.getStyleClass().addAll("mailbox-list-item-menu");
 
+            inbox.setOnAction(e -> {
+                if (!(mail.getBelonging().equals("inbox"))) {
+                    mail.setMoveto("inbox");
+                    new Thread(new moveMailThread(mail)).start();
+                }
+            });
             trash.setOnAction(e -> {
-                mail.setMoveto("trash");
-                new Thread(new moveMailThread(mail)).start();
+                if (!(mail.getBelonging().equals("trash"))) {
+                    mail.setMoveto("trash");
+                    new Thread(new moveMailThread(mail)).start();
+                }
             });
             spam.setOnAction(e -> {
-                mail.setMoveto("spam");
-                new Thread(new moveMailThread(mail)).start();
+                if (!(mail.getBelonging().equals("spam"))) {
+                    mail.setMoveto("spam");
+                    new Thread(new moveMailThread(mail)).start();
+                }
             });
 
             MenuItem delete = new MenuItem("Delete");
             delete.getStyleClass().addAll("mailbox-list-item-menu", "mailbox-list-item-last");
+            delete.setOnAction(e -> {
+                if (!(mail.getBelonging().equals("trash"))) {
+                    mail.setMoveto("trash");
+                    new Thread(new moveMailThread(mail)).start();
+                } else {
+                    new Thread(new delMailThread(mail)).start();
+                }
+            });
 
             MenuItem reply = new MenuItem("Reply");
             reply.getStyleClass().add("mailbox-list-item-menu");
@@ -514,6 +625,9 @@ public class Controller {
 
             new_msg.getChildren().addAll(source_lb, title_lb, cont_lb);
 
+            new_msg.setOnMouseClicked(e -> {
+                new Thread(new showMailThread(new_msg.getMailbind())).start();
+            });
             return new_msg;
         }
     }
@@ -704,24 +818,74 @@ public class Controller {
 
     public class moveMailThread implements Runnable {
 
-        private Mail tomove;
+        private Mail toMove;
 
         public moveMailThread(Mail mail) {
-            this.tomove = mail;
+            this.toMove = mail;
         }
 
         @Override
         public void run() {
             // Move request
             try {
-                connection.moveMailRequest(tomove);
+                connection.moveMailRequest(toMove);
                 Platform.runLater(() -> {
                     clearMailboxList();
+                    new Thread(new refreshMailbox(toMove.getBelonging().toLowerCase())).start();
                 });
-                new Thread(new refreshMailbox(tomove.getBelonging().toLowerCase()));
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    public class delMailThread implements Runnable {
+
+        private Mail toDelete;
+
+        public delMailThread(Mail toDelete) {
+            this.toDelete = toDelete;
+        }
+
+        @Override
+        public void run() {
+            // Move request
+            try {
+                connection.delMailRequest(toDelete);
+                Platform.runLater(() -> {
+                    clearMailboxList();
+                    new Thread(new refreshMailbox(toDelete.getBelonging().toLowerCase())).start();
+                });
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public class showMailThread implements Runnable {
+
+        private Mail toShow;
+
+        public showMailThread(Mail toShow) {
+            this.toShow = toShow;
+        }
+
+        @Override
+        public void run() {
+            Platform.runLater(() -> {
+                clearMailToShow();
+                fillMailContent();
+            });
+        }
+
+        private void fillMailContent() {
+            System.out.println(toShow.toString());
+            mail_head_sender_icon.setText(toShow.getSource().charAt(0) + "");
+            mail_content_title.setText(toShow.getObject());
+            mail_content_to.setText(toShow.getDests().toString());
+//            mail_content_date.setText(toShow.getDate().toString());
+            mail_content_title.setText(toShow.getObject());
+            mail_description.setText(toShow.getContent());
         }
     }
 }

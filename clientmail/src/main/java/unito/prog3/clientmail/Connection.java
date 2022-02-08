@@ -2,7 +2,7 @@ package unito.prog3.clientmail;
 
 import unito.prog3.models.Account;
 import unito.prog3.models.Mail;
-import unito.prog3.utils.ServerAPI;
+import unito.prog3.utils.Protocol;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -27,7 +27,7 @@ public class Connection {
 
     public String login_request(Account acc)
             throws IOException, ClassNotFoundException {
-        out.writeObject(ServerAPI.LOGIN_REQUEST);
+        out.writeObject(Protocol.LOGIN_REQUEST);
 
         //Sending credentials
         sendCredentials(acc);
@@ -55,7 +55,7 @@ public class Connection {
             throw new IllegalArgumentException();
 
         try {
-            out.writeObject(ServerAPI.REG_REQUEST);
+            out.writeObject(Protocol.REG_REQUEST);
             // Sending credentials
             out.writeObject(new_acc);
             // Getting server result
@@ -68,7 +68,7 @@ public class Connection {
     public ArrayList<Mail> mailListRequest(String mailbox)
             throws IOException, ClassNotFoundException {
         // Request
-        out.writeObject(ServerAPI.MAILBOX_LIST);
+        out.writeObject(Protocol.MAILBOX_LIST);
 
         // Sending mailbox
         out.writeObject(mailbox);
@@ -83,7 +83,7 @@ public class Connection {
 
     public void sendMailRequest()
             throws IOException {
-        out.writeObject(ServerAPI.SEND_MSG);
+        out.writeObject(Protocol.SEND_MSG);
     }
 
     public String sendMessage(Mail msg)
@@ -99,10 +99,17 @@ public class Connection {
 
     public void moveMailRequest(Mail tomvoe)
             throws IOException {
-        out.writeObject(ServerAPI.MOVE_REQ);
+        out.writeObject(Protocol.MOVE_REQ);
 
-        System.out.println(tomvoe.getBelonging() + " " + tomvoe.getMoveto());
         // Sending Mail to move
         out.writeObject(tomvoe);
+    }
+
+    public void delMailRequest(Mail toDelete)
+            throws IOException {
+        out.writeObject(Protocol.DEL_REQ);
+
+        // Sending Mail to move
+        out.writeObject(toDelete);
     }
 }

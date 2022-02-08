@@ -1,5 +1,6 @@
 package unito.prog3.utils;
 
+import org.json.JSONObject;
 import unito.prog3.models.Account;
 import unito.prog3.models.Mail;
 
@@ -8,7 +9,13 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
+// Static class
 public class FilesManager {
 
     public static final String USERS_FILE_PATH = "files/users.txt";
@@ -18,13 +25,11 @@ public class FilesManager {
     public static final String TRASH_FILENAME = "trash.txt";
     public static final String SENT_FILENAME = "sent.txt";
 
-    public FilesManager() {
-
-    }
+    private static final Map<File, Lock> FILE_LOCKS = new ConcurrentHashMap<>();
 
     // File methods
 
-    public synchronized static void createFiles(String username)
+    public static void createFiles(String username)
             throws IllegalArgumentException, IOException {
 
         if (username == null)
@@ -45,7 +50,7 @@ public class FilesManager {
         trash.createNewFile();
     }
 
-    public synchronized static boolean dirExist(String username)
+    public static boolean dirExist(String username)
             throws IllegalArgumentException {
 
         if (username == null)
@@ -54,8 +59,11 @@ public class FilesManager {
         return Files.exists(Paths.get(USERS_DIR_PATH + username));
     }
 
-    public synchronized static void addUserToFile(Account new_user)
+    public static void addUserToFile(Account new_user)
             throws IOException {
+
+        JSONObject jsonObj = null;
+        String jsonParsed = null;
 
         if (new_user == null)
             throw new IllegalArgumentException();
@@ -65,13 +73,14 @@ public class FilesManager {
         if (!usersfile.exists())
             throw new FileNotFoundException("[File not found]: Cannot add user, users file does not exist");
 
-        PrintWriter writer = new PrintWriter(new FileWriter(usersfile, true));
-        writer.append(new_user.getUsername() + ":" + new_user.getPassword() + "\n");
-
-        writer.close();
+        synchronized (FILE_LOCKS.computeIfAbsent(usersfile, k -> new ReentrantLock())) {
+            PrintWriter writer = new PrintWriter(new FileWriter(usersfile, true));
+            writer.append(new_user.getUsername() + ":" + new_user.getPassword() + "\n");
+            writer.close();
+        }
     }
 
-    public synchronized static ArrayList<Account> getUsers()
+    public static ArrayList<Account> getUsers()
             throws IOException {
         String line = null;
 
@@ -100,7 +109,7 @@ public class FilesManager {
     }
 
     // Mailboxes methods
-    public synchronized static ArrayList<Mail> getMailBox(String mailbox_name, String username)
+    public static ArrayList<Mail> getMailBox(String mailbox_name, String username)
             throws IOException {
 
         if (mailbox_name == null || username == null)
@@ -126,23 +135,25 @@ public class FilesManager {
         // If not empty, extract all users
         BufferedReader buff = new BufferedReader(new FileReader(mbox));
 
-        // Loop over lines
-        Mail actMail = null;
-        while ((line = buff.readLine()) != null) {
-            actMail = new Mail();
-            actMail.setBelonging(mailbox_name);
+        synchronized (FILE_LOCKS.computeIfAbsent(mbox, k -> new ReentrantLock())) {
+            // Loop over lines
+            Mail actMail = null;
+            while ((line = buff.readLine()) != null) {
+                actMail = new Mail();
+                actMail.setBelonging(mailbox_name);
 
-            String[] splitted = line.split(":");
+                String[] splitted = line.split(":");
 
-            actMail.setSource(splitted[0]);
-            actMail.setObject(splitted[1]);
-            actMail.setContent(splitted[splitted.length - 1]);
+                actMail.setSource(splitted[0]);
+                actMail.setObject(splitted[1]);
+                actMail.setContent(splitted[splitted.length - 1]);
 
-            String[] destSplit = splitted[2].replaceAll("[<>]", "").split(",");
+                String[] destSplit = splitted[2].replaceAll("[<>]", "").split(",");
 
-            actMail.setDests(new ArrayList<>(Arrays.asList(destSplit)));
+                actMail.setDests(new ArrayList<>(Arrays.asList(destSplit)));
 
-            mailbox.add(actMail);
+                mailbox.add(actMail);
+            }
         }
 
         // Closing buffers
@@ -151,7 +162,7 @@ public class FilesManager {
         return mailbox;
     }
 
-    public synchronized static void rmMailFromMailbox(String owner, Mail toremove)
+    public static void rmMailFromMailbox(String owner, Mail toremove)
             throws IOException {
 
         if (owner == null || toremove == null)
@@ -170,40 +181,60 @@ public class FilesManager {
         BufferedReader oldMailboxBuff = new BufferedReader(new FileReader(oldMailbox));
         BufferedWriter newMailboxBuff = new BufferedWriter(new FileWriter(newMailbox));
 
-        String line = null;
-        while ((line = oldMailboxBuff.readLine()) != null) {
-            if (!line.equals(lineToRemove)) {
-                newMailboxBuff.write(line);
-                newMailboxBuff.newLine();
+        synchronized (FILE_LOCKS.computeIfAbsent(oldMailbox, k -> new ReentrantLock())) {
+            String line = null;
+            while ((line = oldMailboxBuff.readLine()) != null) {
+                if (!line.equals(lineToRemove)) {
+                    newMailboxBuff.write(line);
+                    newMailboxBuff.newLine();
+                }
             }
+
+            newMailboxBuff.close();
+            oldMailboxBuff.close();
+
+            oldMailbox.delete();
+            newMailbox.renameTo(oldMailbox);
         }
-
-        newMailboxBuff.close();
-        oldMailboxBuff.close();
-
-        oldMailbox.delete();
-        newMailbox.renameTo(oldMailbox);
     }
 
-    public synchronized static void insMailToMailbox(String owner, Mail toinsert)
+    public static void insMailToMailbox(String owner, Mail toinsert)
             throws IOException {
 
         if (toinsert == null || owner == null)
             throw new IllegalArgumentException();
 
-        // Building file dest path
-        String fdest_path = USERS_DIR_PATH +
-                owner + "/" +
-                toinsert.getMoveto() + ".txt";
+        // Building file dest
+        File dest = new File(USERS_DIR_PATH + owner + "/" + toinsert.getMoveto() + ".txt");
 
-        PrintWriter writer = new PrintWriter(new FileWriter(fdest_path, true));
-        writer.append(toinsert + "\n");
+        synchronized (FILE_LOCKS.computeIfAbsent(dest, k -> new ReentrantLock())) {
+            PrintWriter writer = new PrintWriter(new FileWriter(dest, true));
+            writer.append(toinsert + "\n");
 
-        //
-        writer.close();
+            //
+            writer.close();
+        }
     }
 
-    public synchronized static void moveMail(String owner, Mail tomove)
+    public static void addSentMail(String owner, Mail toinsert)
+            throws IOException {
+
+        if (toinsert == null || owner == null)
+            throw new IllegalArgumentException();
+
+        // Building file dest
+        File dest = new File(USERS_DIR_PATH + owner + "/sent.txt");
+
+        synchronized (FILE_LOCKS.computeIfAbsent(dest, k -> new ReentrantLock())) {
+            PrintWriter writer = new PrintWriter(new FileWriter(dest, true));
+            writer.append(toinsert + "\n");
+
+            //
+            writer.close();
+        }
+    }
+
+    public static void moveMail(String owner, Mail tomove)
             throws IOException {
 
         if (tomove == null)
