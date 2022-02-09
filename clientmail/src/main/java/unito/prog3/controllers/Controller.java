@@ -65,6 +65,9 @@ public class Controller {
 
     //FXML Objs
     @FXML
+    private AnchorPane reply_box_wrap;
+
+    @FXML
     private HBox main_content_head;
 
     @FXML
@@ -403,6 +406,27 @@ public class Controller {
         new Thread(new sendMailThread()).start();
     }
 
+    // Reply Box Functions
+    @FXML
+    void mailDelete(MouseEvent event) {
+
+    }
+
+    @FXML
+    void mailForward(MouseEvent event) {
+
+    }
+
+    @FXML
+    void mailReply(MouseEvent event) {
+
+    }
+
+    @FXML
+    void mailReplyAll(MouseEvent event) {
+
+    }
+
     // 
     public void clearMailboxList() {
         // Clearing Mail List (GUI)
@@ -431,8 +455,8 @@ public class Controller {
 
     // Reply
     @FXML
-    public void mailReply() {
-
+    public void openMailReplyBox() {
+        reply_box_wrap.setVisible(true);
     }
 
     @FXML

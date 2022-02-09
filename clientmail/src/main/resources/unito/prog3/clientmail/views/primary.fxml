@@ -67,7 +67,7 @@
                                                 <Cursor fx:constant="HAND" />
                                             </cursor>
                                         </ImageView>
-                                        <ImageView fx:id="reply_btn" fitHeight="33.0" fitWidth="42.0" onMouseClicked="#mailReply" pickOnBounds="true" preserveRatio="true">
+                                        <ImageView fx:id="reply_btn" fitHeight="33.0" fitWidth="42.0" onMouseClicked="#openMailReplyBox" pickOnBounds="true" preserveRatio="true">
                                             <image>
                                                 <Image url="@../imgs/reply.png" />
                                             </image>
@@ -121,7 +121,7 @@
                                                 </DropShadow>
                                             </effect>
                                         </AnchorPane>
-                              <AnchorPane prefHeight="279.0" prefWidth="200.0" styleClass="reply-box-wrap" stylesheets="@../style/Style.css" AnchorPane.rightAnchor="0.0">
+                              <AnchorPane fx:id="reply_box_wrap" prefHeight="279.0" prefWidth="200.0" styleClass="reply-box-wrap" stylesheets="@../style/Style.css" visible="false" AnchorPane.rightAnchor="0.0">
                                  <effect>
                                     <DropShadow blurType="GAUSSIAN" height="5.0" radius="2.0" spread="0.75" width="5.0">
                                        <color>
@@ -145,7 +145,7 @@
                                           </HBox>
                                           <HBox alignment="CENTER" prefHeight="91.0" prefWidth="190.0" spacing="5.0">
                                              <children>
-                                                <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" styleClass="reply-box-item">
+                                                <VBox alignment="CENTER" onMouseClicked="#mailReply" prefHeight="200.0" prefWidth="100.0" styleClass="reply-box-item">
                                                    <children>
                                                       <ImageView fitHeight="45.0" fitWidth="45.0" pickOnBounds="true" preserveRatio="true">
                                                          <image>
@@ -158,7 +158,7 @@
                                                       <Cursor fx:constant="HAND" />
                                                    </cursor>
                                                 </VBox>
-                                                <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" styleClass="reply-box-item">
+                                                <VBox alignment="CENTER" onMouseClicked="#mailReplyAll" prefHeight="200.0" prefWidth="100.0" styleClass="reply-box-item">
                                                    <children>
                                                       <ImageView fitHeight="45.0" fitWidth="45.0" pickOnBounds="true" preserveRatio="true">
                                                          <image>
@@ -175,7 +175,7 @@
                                           </HBox>
                                           <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="5.0">
                                              <children>
-                                                <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" styleClass="reply-box-item">
+                                                <VBox alignment="CENTER" onMouseClicked="#mailForward" prefHeight="200.0" prefWidth="100.0" styleClass="reply-box-item">
                                                    <children>
                                                       <ImageView fitHeight="45.0" fitWidth="45.0" pickOnBounds="true" preserveRatio="true">
                                                          <image>
@@ -188,7 +188,7 @@
                                                       <Cursor fx:constant="HAND" />
                                                    </cursor>
                                                 </VBox>
-                                                <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" styleClass="reply-box-item">
+                                                <VBox alignment="CENTER" onMouseClicked="#mailDelete" prefHeight="200.0" prefWidth="100.0" styleClass="reply-box-item">
                                                    <children>
                                                       <ImageView fitHeight="45.0" fitWidth="45.0" pickOnBounds="true" preserveRatio="true">
                                                          <image>
