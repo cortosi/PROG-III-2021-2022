@@ -12,6 +12,7 @@ import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -19,6 +20,9 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import unito.prog3.clientmail.Connection;
 import unito.prog3.clientmail.MailClient;
@@ -65,7 +69,19 @@ public class Controller {
 
     //FXML Objs
     @FXML
-    private AnchorPane reply_box_wrap;
+    private Label mail_content_sender;
+
+    @FXML
+    private Label reply_box_sender_icon;
+
+    @FXML
+    private Label reply_box_title;
+
+    @FXML
+    private Label reply_box_sender;
+
+    @FXML
+    private AnchorPane reply_box_window;
 
     @FXML
     private HBox main_content_head;
@@ -309,7 +325,6 @@ public class Controller {
         tl.play();
     }
 
-
     // Side section
     @FXML
     private void close_folders() {
@@ -456,7 +471,12 @@ public class Controller {
     // Reply
     @FXML
     public void openMailReplyBox() {
-        reply_box_wrap.setVisible(true);
+        reply_box_window.setVisible(true);
+    }
+
+    @FXML
+    public void closeMailReplyBox() {
+        reply_box_window.setVisible(false);
     }
 
     @FXML
@@ -503,6 +523,12 @@ public class Controller {
         new_msg_to_datafield.textProperty().addListener(e -> {
             new_msg_to_datafield.getStyleClass().removeAll("new-mail-wrong-to");
         });
+
+        //
+        reply_box_title.textProperty().bind(mail_content_title.textProperty());
+        reply_box_sender_icon.textProperty().bind(mail_head_sender_icon.textProperty());
+        reply_box_sender.textProperty().bind(mail_content_sender.textProperty());
+
     }
 
 
@@ -916,7 +942,7 @@ public class Controller {
 
         private void fillMailContent() {
             mail_head_sender_icon.setText(toShow.getSource().charAt(0) + "");
-            mail_content_title.setText(toShow.getObject());
+            mail_content_sender.setText(toShow.getSource());
             mail_content_to.setText(toShow.getDests().toString());
 //            mail_content_date.setText(toShow.getDate().toString());
             mail_content_title.setText(toShow.getObject());

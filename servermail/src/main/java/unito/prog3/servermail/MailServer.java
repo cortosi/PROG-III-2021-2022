@@ -1,6 +1,6 @@
 package unito.prog3.servermail;
 
-public class MailServer {
+public class  MailServer {
 
     private final static int DEFAULT_PORT = 1998;
 

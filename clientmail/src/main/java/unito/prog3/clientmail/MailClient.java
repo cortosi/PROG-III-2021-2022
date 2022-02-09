@@ -22,7 +22,6 @@ public class MailClient extends Application {
             stage.setScene(scene);
             // Stylesheets
             scene.getStylesheets().add(MailClient.class.getResource("style/Style.css").toExternalForm());
-
             stage.show();
         } catch (IOException e1) {
             e1.printStackTrace();
