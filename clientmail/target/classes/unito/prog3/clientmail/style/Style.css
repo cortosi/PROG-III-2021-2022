@@ -268,8 +268,7 @@
 
 .mail-head {
     -fx-border-style: hidden hidden solid hidden;
-    -fx-border-color: #F8F9FA;
-    -fx-border-width: .5px;
+    -fx-border-color: #E4E4E6;
 }
 
 .mail-head-sender-icon {

@@ -3,7 +3,6 @@ package unito.prog3.controllers;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -12,7 +11,6 @@ import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -20,9 +18,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import unito.prog3.clientmail.Connection;
 import unito.prog3.clientmail.MailClient;
@@ -454,11 +449,7 @@ public class Controller {
         new_msg_content.clear();
     }
 
-    public void clearMailToShow() {
-        no_selected_mail_wrap.setVisible(false);
-        mail_content.setVisible(true);
-        main_content_head.setVisible(true);
-
+    public void clearSelectedMail() {
         //
         mail_head_sender_icon.setText("");
         mail_content_title.setText("");
@@ -466,6 +457,17 @@ public class Controller {
         mail_content_date.setText("");
         mail_content_title.setText("");
         mail_description.setText("");
+
+        //
+        no_selected_mail_wrap.setVisible(false);
+        mail_content.setVisible(true);
+        main_content_head.setVisible(true);
+    }
+
+    public void showEmptySelectedMail() {
+        mail_content.setVisible(false);
+        main_content_head.setVisible(false);
+        no_selected_mail_wrap.setVisible(true);
     }
 
     // Reply
@@ -477,6 +479,18 @@ public class Controller {
     @FXML
     public void closeMailReplyBox() {
         reply_box_window.setVisible(false);
+    }
+
+    @FXML
+    public void deleteSelectedMail() {
+        if (actMail.getBelonging().equals("trash")) {
+            showEmptySelectedMail();
+            new Thread(new delMailThread(actMail)).start();
+        } else {
+            actMail.setMoveto("trash");
+            showEmptySelectedMail();
+            new Thread(new moveMailThread(actMail)).start();
+        }
     }
 
     @FXML
@@ -530,7 +544,6 @@ public class Controller {
         reply_box_sender.textProperty().bind(mail_content_sender.textProperty());
 
     }
-
 
     // Custom JavaFX Graphics
     public class mailItem extends VBox {
@@ -934,7 +947,7 @@ public class Controller {
         @Override
         public void run() {
             Platform.runLater(() -> {
-                clearMailToShow();
+                clearSelectedMail();
                 fillMailContent();
                 actMail = toShow;
             });
