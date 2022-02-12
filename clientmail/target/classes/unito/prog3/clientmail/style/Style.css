@@ -187,8 +187,8 @@
     -fx-background-radius: 10;
     -fx-padding: 5;
     -fx-max-height: 90;
-    /*-fx-alignment: center-left;*/
-    -fx-border-style: solid hidden hidden hidden;
+    -fx-border-style: hidden hidden solid hidden;
+    -fx-border-width: .5;
     -fx-border-color: #b4b4b6;
     -fx-cursor: hand;
     -fx-spacing: 2;
@@ -301,6 +301,7 @@
 }
 
 .mid-head {
+    -fx-spacing: 3;
 }
 
 .mail-head-sender-icon {
@@ -320,6 +321,8 @@
 }
 
 .mail-content-to {
+    -fx-font-weight: bold;
+    -fx-text-fill: #a0a0a4;
 }
 
 .mail-content-date {
@@ -470,4 +473,11 @@
 
 .mail-content-replies-wrap {
     -fx-padding: 5;
+}
+
+.read-section {
+    -fx-padding: 0 5;
+}
+
+.mailbox-list-item-dot {
 }

@@ -156,7 +156,7 @@ public class FilesManager {
             throws IOException {
 
         ObjectMapper mapper = new ObjectMapper();
-        ArrayList<Mail> mailBox = new ArrayList<>();
+        ArrayList<Mail> mailBox;
 
         if (toInsert == null || user == null)
             throw new IllegalArgumentException();
@@ -168,7 +168,9 @@ public class FilesManager {
         }
         toInsert.setBelonging(toInsert.getMoveto());
 
-        File json = new File(USERS_DIR_PATH + user + "/" + toInsert.getMoveto() + ".json");
+        File json = new File(USERS_DIR_PATH + user + "/"
+                + toInsert.getMoveto() + ".json");
+
         synchronized (FILE_LOCKS.computeIfAbsent(json, k -> new ReentrantLock())) {
             try {
                 mailBox = mapper.readValue(json, new TypeReference<>() {
@@ -187,6 +189,7 @@ public class FilesManager {
             mailBox.add(toInsert);
             new ObjectMapper().writeValue(json, mailBox);
         }
+
         //
         incLastID();
     }
@@ -220,30 +223,40 @@ public class FilesManager {
         insMailToMailbox(user, toMove);
     }
 
-    public static void replaceMail(String user, Mail toReplace)
-            throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        ArrayList<Mail> mailBox = new ArrayList<>();
-        boolean found = false;
+    public static void replyMail(String user, Mail msg)
+            throws IOException {
 
-        if (toReplace == null || user == null)
+        if (msg == null || user == null)
             throw new IllegalArgumentException();
 
-        toReplace.setBelonging("inbox");
+        System.out.println(msg);
+        ObjectMapper mapper = new ObjectMapper();
+        ArrayList<Mail> mailBox;
+
+        int precID = msg.getPrec().getId();
 
         File json = new File(USERS_DIR_PATH + user + "/inbox.json");
 
-        mailBox = mapper.readValue(json, new TypeReference<>() {
-        });
-
-        for (int i = 0; i < mailBox.size() && !found; i++) {
-            if (mailBox.get(i).getId() == toReplace.getId()) {
-                mailBox.remove(i);
-                found = true;
+        synchronized (FILE_LOCKS.computeIfAbsent(json, k -> new ReentrantLock())) {
+            try {
+                mailBox = mapper.readValue(json, new TypeReference<>() {
+                });
+            } catch (IOException e) {
+                mailBox = new ArrayList<>();
             }
+
+            for (int i = 0; i < mailBox.size(); i++) {
+                if (mailBox.get(i).getId() == precID) {
+                    mailBox.remove(i);
+                }
+            }
+
+            mailBox.add(msg);
+            System.out.println(mailBox);
+            new ObjectMapper().writeValue(json, mailBox);
         }
-        mailBox.add(toReplace);
-        new ObjectMapper().writeValue(json, mailBox);
+        //
+        incLastID();
     }
 
     public static int getLastID()

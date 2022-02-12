@@ -182,10 +182,12 @@ public class HandleClient implements Runnable {
         // Getting message from client
         Object obj = in.readObject();
 
-        if (!(obj instanceof Mail toReplace))
+        if (!(obj instanceof Mail msg))
             throw new InvalidObjectException("[Invalid Object]: Mail required for moving");
 
-        FilesManager.replaceMail(clientAcc.getUsername(), toReplace);
+        for (String username : msg.getDests()) {
+            FilesManager.replyMail(username, msg);
+        }
     }
 
     @Override
@@ -201,6 +203,7 @@ public class HandleClient implements Runnable {
             try {
                 if ((read = in.readObject()) != null) {
                     if (read instanceof Protocol) {
+                        System.out.println(read);
                         switch ((Protocol) read) {
                             case REG_REQUEST -> {
                                 System.out.println(

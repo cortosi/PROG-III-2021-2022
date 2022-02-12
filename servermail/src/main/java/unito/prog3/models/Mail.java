@@ -15,7 +15,7 @@ public class Mail implements Serializable {
     private String content;
     private String belonging = "inbox";
     private String moveto;
-    private ArrayList<Mail> replies;
+    private Mail prec;
     private ArrayList<String> dests;
     private boolean read = false;
     private Date date;
@@ -56,8 +56,8 @@ public class Mail implements Serializable {
         return object;
     }
 
-    public ArrayList<Mail> getReplies() {
-        return replies;
+    public Mail getPrec() {
+        return prec;
     }
 
     public void setSource(String source) {
@@ -96,8 +96,8 @@ public class Mail implements Serializable {
         this.id = id;
     }
 
-    public void setReplies(ArrayList<Mail> replies) {
-        this.replies = replies;
+    public void setPrec(Mail prec) {
+        this.prec = prec;
     }
 
     @Override
@@ -109,6 +109,7 @@ public class Mail implements Serializable {
                 ", content='" + content + '\'' +
                 ", belonging='" + belonging + '\'' +
                 ", moveto='" + moveto + '\'' +
+                ", prec=" + prec +
                 ", dests=" + dests +
                 ", read=" + read +
                 ", date=" + date +

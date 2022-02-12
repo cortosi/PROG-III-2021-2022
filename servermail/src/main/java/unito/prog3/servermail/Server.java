@@ -73,10 +73,6 @@ public class Server implements Runnable {
         // Save mail into sent mailbox
         FilesManager.addSentMail(msg.getSource(), msg);
 
-        // src:title:<dst1:dst2>:content
-        if (msg == null)
-            throw new IllegalArgumentException();
-
         // Extract destinations
         ArrayList<String> dests = msg.getDests();
 

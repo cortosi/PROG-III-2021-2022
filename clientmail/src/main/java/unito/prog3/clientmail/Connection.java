@@ -86,6 +86,11 @@ public class Connection {
         out.writeObject(Protocol.SEND_MSG);
     }
 
+    public void replyMailRequest()
+            throws IOException {
+        out.writeObject(Protocol.REPLY_REQ);
+    }
+
     public String sendMessage(Mail msg)
             throws IOException, ClassNotFoundException {
         if (msg == null)
