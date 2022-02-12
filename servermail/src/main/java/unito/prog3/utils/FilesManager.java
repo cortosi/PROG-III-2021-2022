@@ -18,12 +18,13 @@ import java.util.concurrent.locks.ReentrantLock;
 // Static class
 public class FilesManager {
 
-    public static final String USERS_FILE_PATH = "files/users.txt";
+    public static final String USERS_FILE_PATH = "files/users.json";
+    public static final String SERVER_FILE_PATH = "files/server.json";
     public static final String USERS_DIR_PATH = "files/";
-    public static final String INBOX_FILENAME = "inbox.txt";
-    public static final String SPAM_FILENAME = "spam.txt";
-    public static final String TRASH_FILENAME = "trash.txt";
-    public static final String SENT_FILENAME = "sent.txt";
+    public static final String INBOX_FILENAME = "inbox.json";
+    public static final String SPAM_FILENAME = "spam.json";
+    public static final String TRASH_FILENAME = "trash.json";
+    public static final String SENT_FILENAME = "sent.json";
 
     private static final Map<File, Lock> FILE_LOCKS = new ConcurrentHashMap<>();
 
@@ -82,8 +83,7 @@ public class FilesManager {
         return true;
     }
 
-    public static ArrayList<Account> getUsers()
-            throws IOException {
+    public static ArrayList<Account> getUsers() {
 
         ObjectMapper mapper = new ObjectMapper();
         ArrayList<Account> users;
@@ -101,8 +101,7 @@ public class FilesManager {
     }
 
     // Mailboxes methods
-    public static ArrayList<Mail> getMailBox(String username, String mailbox_name)
-            throws IOException {
+    public static ArrayList<Mail> getMailBox(String username, String mailbox_name) {
 
         ObjectMapper mapper = new ObjectMapper();
         ArrayList<Mail> mailbox;
@@ -110,14 +109,14 @@ public class FilesManager {
         if (mailbox_name == null || username == null)
             throw new IllegalArgumentException();
 
-        File json = new File(USERS_DIR_PATH + username + "/" + mailbox_name + ".txt");
-
+        File json = new File(USERS_DIR_PATH + username + "/" + mailbox_name + ".json");
         try {
             mailbox = mapper.readValue(json, new TypeReference<>() {
             });
         } catch (IOException e) {
             mailbox = new ArrayList<>();
         }
+
         return mailbox;
     }
 
@@ -131,7 +130,7 @@ public class FilesManager {
         if (toRemove == null || user == null)
             throw new IllegalArgumentException();
 
-        File json = new File(USERS_DIR_PATH + user + "/" + toRemove.getBelonging() + ".txt");
+        File json = new File(USERS_DIR_PATH + user + "/" + toRemove.getBelonging() + ".json");
 
         synchronized (FILE_LOCKS.computeIfAbsent(json, k -> new ReentrantLock())) {
             try {
@@ -163,14 +162,13 @@ public class FilesManager {
             throw new IllegalArgumentException();
 
         try {
-            toInsert.setId(getNextID(user));
+            toInsert.setId(getLastID());
         } catch (IOException e) {
             toInsert.setId(0);
         }
         toInsert.setBelonging(toInsert.getMoveto());
 
-        File json = new File(USERS_DIR_PATH + user + "/" + toInsert.getMoveto() + ".txt");
-
+        File json = new File(USERS_DIR_PATH + user + "/" + toInsert.getMoveto() + ".json");
         synchronized (FILE_LOCKS.computeIfAbsent(json, k -> new ReentrantLock())) {
             try {
                 mailBox = mapper.readValue(json, new TypeReference<>() {
@@ -189,8 +187,8 @@ public class FilesManager {
             mailBox.add(toInsert);
             new ObjectMapper().writeValue(json, mailBox);
         }
-
-        setNewID(user, toInsert.getId());
+        //
+        incLastID();
     }
 
     public static void addSentMail(String user, Mail toInsert)
@@ -200,7 +198,7 @@ public class FilesManager {
             throw new IllegalArgumentException();
 
         ArrayList<Mail> sentMailBox = new ArrayList<>();
-        File destFile = new File(USERS_DIR_PATH + user + "/sent.txt");
+        File destFile = new File(USERS_DIR_PATH + user + "/sent.json");
 
         synchronized (FILE_LOCKS.computeIfAbsent(destFile, k -> new ReentrantLock())) {
             sentMailBox = getMailBox(user, "sent");
@@ -222,34 +220,62 @@ public class FilesManager {
         insMailToMailbox(user, toMove);
     }
 
-    public static int getNextID(String user) throws IOException {
-        File json = new File(USERS_FILE_PATH);
+    public static void replaceMail(String user, Mail toReplace)
+            throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        ArrayList<Mail> mailBox = new ArrayList<>();
+        boolean found = false;
 
-        ArrayList<Account> users = new ObjectMapper().readValue(json, new TypeReference<>() {
+        if (toReplace == null || user == null)
+            throw new IllegalArgumentException();
+
+        toReplace.setBelonging("inbox");
+
+        File json = new File(USERS_DIR_PATH + user + "/inbox.json");
+
+        mailBox = mapper.readValue(json, new TypeReference<>() {
         });
 
-        for (Account acc : users) {
-            if (acc.getUsername().equals(user))
-                return acc.getReceived() + 1;
+        for (int i = 0; i < mailBox.size() && !found; i++) {
+            if (mailBox.get(i).getId() == toReplace.getId()) {
+                mailBox.remove(i);
+                found = true;
+            }
+        }
+        mailBox.add(toReplace);
+        new ObjectMapper().writeValue(json, mailBox);
+    }
+
+    public static int getLastID()
+            throws IOException {
+        File json = new File(SERVER_FILE_PATH);
+
+        HashMap<String, Object> settings = new ObjectMapper().readValue(json, new TypeReference<>() {
+        });
+
+        if (settings.containsKey("ID")) {
+            return (Integer) settings.get("ID");
         }
 
         return 0;
     }
 
-    public static void setNewID(String user, int newID) throws IOException {
-        File json = new File(USERS_FILE_PATH);
-        boolean found = false;
-        ArrayList<Account> users = new ObjectMapper().readValue(json, new TypeReference<>() {
-        });
+    public static void incLastID()
+            throws IOException {
+        HashMap<String, Object> settings = new HashMap<>();
 
-        for (int i = 0; i < users.size() && !found; i++) {
-            if (users.get(i).getUsername().equals(user)) {
-                users.get(i).setReceived(newID);
-                found = true;
-            }
+        File json = new File(SERVER_FILE_PATH);
+        try {
+            settings = new ObjectMapper().readValue(json, new TypeReference<>() {
+            });
+        } catch (Exception e) {
+            //error check to do
+
+            e.printStackTrace();
         }
+        settings.replace("ID", getLastID() + 1);
 
-        new ObjectMapper().writeValue(json, users);
+        new ObjectMapper().writeValue(json, settings);
     }
 }
 

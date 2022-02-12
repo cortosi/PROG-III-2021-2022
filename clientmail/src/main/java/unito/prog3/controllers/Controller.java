@@ -9,15 +9,19 @@ import java.util.regex.Pattern;
 
 import javafx.animation.*;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
 import unito.prog3.clientmail.Connection;
 import unito.prog3.clientmail.MailClient;
@@ -30,7 +34,8 @@ public class Controller {
     //
     private Account my_acc;
     private ArrayList<Mail> msglist;
-    private Mail actMail;
+    private Mail selectedMail;
+    private VBox lastFocussed;
 
     // Connection Interface
     private Connection connection;
@@ -60,53 +65,29 @@ public class Controller {
     // Transition/Animation Objs
     RotateTransition rotateLoginLoader = new RotateTransition();
 
-    private final emptyMailbox empty_msg_list = new emptyMailbox();
+    private final EmptyMailBox empty_msg_list = new EmptyMailBox();
 
     //FXML Objs
     @FXML
-    private Label mail_content_sender;
+    private ScrollPane mail_content_replies_outer;
 
     @FXML
-    private Label reply_box_sender_icon;
+    private ImageView reply_msg_send_btn;
 
     @FXML
-    private Label reply_box_title;
+    private VBox mail_content_replies_wrap;
 
     @FXML
-    private Label reply_box_sender;
-
-    @FXML
-    private AnchorPane reply_box_window;
-
-    @FXML
-    private HBox main_content_head;
-
-    @FXML
-    private HBox folder_item;
+    private VBox reply_mail_wrap;
 
     @FXML
     private AnchorPane folders_section;
-
-    @FXML
-    private VBox folders_section_folderlist;
-
-    @FXML
-    private Label folders_section_title;
 
     @FXML
     private StackPane folders_section_wrap;
 
     @FXML
     private Label head_username;
-
-    @FXML
-    private ImageView junk_btn;
-
-    @FXML
-    private ImageView junk_btn1;
-
-    @FXML
-    private HBox junk_items;
 
     @FXML
     private Pane login_loader;
@@ -139,7 +120,7 @@ public class Controller {
     private Label mail_content_date;
 
     @FXML
-    private AnchorPane mail_content_outer;
+    private Label mail_content_sender;
 
     @FXML
     private Label mail_content_title;
@@ -151,28 +132,16 @@ public class Controller {
     private Label mail_description;
 
     @FXML
-    private VBox mail_description_outer;
-
-    @FXML
-    private ScrollPane mail_description_wrap;
-
-    @FXML
-    private HBox mail_head;
-
-    @FXML
     private Label mail_head_sender_icon;
 
     @FXML
     private BorderPane main;
 
     @FXML
-    private BorderPane main_content;
+    private HBox main_content_head;
 
     @FXML
     private AnchorPane main_window;
-
-    @FXML
-    private ImageView new_mail_btn;
 
     @FXML
     private AnchorPane new_mail_outer;
@@ -184,6 +153,9 @@ public class Controller {
     private TextArea new_msg_content;
 
     @FXML
+    private TextArea reply_msg_content;
+
+    @FXML
     private TextField new_msg_obj_datafield;
 
     @FXML
@@ -193,7 +165,34 @@ public class Controller {
     private TextField new_msg_to_datafield;
 
     @FXML
-    private Label new_msg_undo;
+    private VBox no_selected_mail_wrap;
+
+    @FXML
+    private VBox reply_area;
+
+    @FXML
+    private Label reply_box_sender;
+
+    @FXML
+    private Label reply_box_sender_icon;
+
+    @FXML
+    private Label reply_box_title;
+
+    @FXML
+    private AnchorPane reply_box_window;
+
+    @FXML
+    private AnchorPane reply_mail_window;
+
+    @FXML
+    private Label reply_mail_head_desc;
+
+    @FXML
+    private TextField reply_msg_obj_datafield;
+
+    @FXML
+    private TextField reply_msg_to_datafield;
 
     @FXML
     private VBox selected_mail_list;
@@ -202,19 +201,10 @@ public class Controller {
     private Label selected_msg_n;
 
     @FXML
-    private HBox sent_item;
-
-    @FXML
     private Label show_folders_btn;
 
     @FXML
-    private Label show_login_btn;
-
-    @FXML
     private Label show_signup_btn;
-
-    @FXML
-    private VBox side_section_mails;
 
     @FXML
     private AnchorPane signup_logo_wrap;
@@ -226,19 +216,10 @@ public class Controller {
     private TextField signup_psw_field;
 
     @FXML
-    private ImageView signup_submit_btn;
-
-    @FXML
     private TextField signup_usr_field;
 
     @FXML
     private Label signup_wrong_input;
-
-    @FXML
-    private HBox spam_item;
-
-    @FXML
-    private VBox no_selected_mail_wrap;
 
     // Login/Signup
     @FXML
@@ -413,7 +394,7 @@ public class Controller {
 
     @FXML
     private void send_new_mail() {
-        new Thread(new sendMailThread()).start();
+        new Thread(new sendMailThread(false)).start();
     }
 
     // Reply Box Functions
@@ -429,7 +410,9 @@ public class Controller {
 
     @FXML
     void mailReply(MouseEvent event) {
-
+        clearReplyMail();
+        fillReplyMail();
+        showReplyWindow();
     }
 
     @FXML
@@ -449,30 +432,44 @@ public class Controller {
         new_msg_content.clear();
     }
 
+    public void clearReplyMail() {
+        reply_msg_to_datafield.clear();
+        reply_msg_obj_datafield.clear();
+        reply_msg_content.clear();
+        reply_mail_head_desc.setText("");
+        reply_area.getChildren().remove(1, reply_area.getChildren().size());
+    }
+
     public void clearSelectedMail() {
         //
-        mail_head_sender_icon.setText("");
-        mail_content_title.setText("");
-        mail_content_to.setText("");
-        mail_content_date.setText("");
-        mail_content_title.setText("");
-        mail_description.setText("");
-
-        //
         no_selected_mail_wrap.setVisible(false);
-        mail_content.setVisible(true);
+        mail_content_replies_outer.setVisible(true);
         main_content_head.setVisible(true);
+        mail_content_replies_wrap.getChildren().clear();
     }
 
     public void showEmptySelectedMail() {
-        mail_content.setVisible(false);
-        main_content_head.setVisible(false);
+        mail_content_replies_outer.setVisible(false);
+        mail_content_replies_wrap.getChildren().clear();
         no_selected_mail_wrap.setVisible(true);
+    }
+
+    public void fillReplyMail() {
+        reply_msg_to_datafield.setText(selectedMail.getSource());
+        reply_msg_obj_datafield.setText("RE: " + selectedMail.getObject());
+        reply_mail_head_desc.setText("RE: " + selectedMail.getObject());
+        //
+        for (Mail reply : selectedMail.getReplies()) {
+            reply_area.getChildren().add(new ReplyItem(reply));
+        }
     }
 
     // Reply
     @FXML
     public void openMailReplyBox() {
+        reply_box_sender_icon.setText(selectedMail.getSource().charAt(0) + "");
+        reply_box_sender.setText(selectedMail.getSource());
+        reply_box_title.setText(selectedMail.getObject());
         reply_box_window.setVisible(true);
     }
 
@@ -483,14 +480,46 @@ public class Controller {
 
     @FXML
     public void deleteSelectedMail() {
-        if (actMail.getBelonging().equals("trash")) {
+        if (selectedMail.getBelonging().equals("trash")) {
             showEmptySelectedMail();
-            new Thread(new delMailThread(actMail)).start();
+            new Thread(new delMailThread(selectedMail)).start();
         } else {
-            actMail.setMoveto("trash");
+            selectedMail.setMoveto("trash");
             showEmptySelectedMail();
-            new Thread(new moveMailThread(actMail)).start();
+            new Thread(new moveMailThread(selectedMail)).start();
         }
+    }
+
+    @FXML
+    public void hide_reply_mail() {
+        Animation animation = new Timeline(
+                new KeyFrame(Duration.millis(100),
+                        new KeyValue(reply_mail_wrap.opacityProperty(), 0)),
+                new KeyFrame(Duration.millis(150),
+                        new KeyValue(reply_mail_wrap.translateYProperty(),
+                                main_window.getHeight())),
+                new KeyFrame(Duration.millis(200),
+                        new KeyValue(reply_mail_window.opacityProperty(), 0)));
+
+        animation.setOnFinished(e -> reply_mail_window.setVisible(false));
+
+        animation.play();
+    }
+
+    public void showReplyWindow() {
+        reply_mail_wrap.translateYProperty().set(main_window.getHeight());
+
+        reply_mail_window.setVisible(true);
+
+        Animation animation = new Timeline(
+                new KeyFrame(Duration.millis(100),
+                        new KeyValue(reply_mail_window.opacityProperty(), 1)),
+                new KeyFrame(Duration.millis(150),
+                        new KeyValue(reply_mail_wrap.translateYProperty(), 0)),
+                new KeyFrame(Duration.millis(200),
+                        new KeyValue(reply_mail_wrap.opacityProperty(), 1)));
+
+        animation.play();
     }
 
     @FXML
@@ -534,22 +563,27 @@ public class Controller {
             }
         });
 
+        reply_msg_content.textProperty().addListener(e -> {
+            if (reply_msg_content.getText().length() == 0) {
+                reply_msg_send_btn.setImage(cannot_send);
+                reply_msg_send_btn.getStyleClass().removeAll("can-send");
+            } else {
+                reply_msg_send_btn.setImage(can_send);
+                reply_msg_send_btn.getStyleClass().add("can-send");
+            }
+        });
+
         new_msg_to_datafield.textProperty().addListener(e -> {
             new_msg_to_datafield.getStyleClass().removeAll("new-mail-wrong-to");
         });
-
-        //
-        reply_box_title.textProperty().bind(mail_content_title.textProperty());
-        reply_box_sender_icon.textProperty().bind(mail_head_sender_icon.textProperty());
-        reply_box_sender.textProperty().bind(mail_content_sender.textProperty());
-
     }
 
     // Custom JavaFX Graphics
-    public class mailItem extends VBox {
+    public class MailItem extends VBox {
         private final Mail mailbind;
+        private BooleanProperty focussed;
 
-        public mailItem(Mail tobind) {
+        public MailItem(Mail tobind) {
             super();
             this.mailbind = tobind;
         }
@@ -559,11 +593,11 @@ public class Controller {
         }
     }
 
-    public class emptyMailbox extends StackPane {
+    public class EmptyMailBox extends StackPane {
 
         private Label description;
 
-        public emptyMailbox() {
+        public EmptyMailBox() {
             super();
             this.getStyleClass().add("empty-msg-list");
             this.alignmentProperty().set(Pos.TOP_CENTER);
@@ -572,6 +606,43 @@ public class Controller {
             description = new Label("There is no messages");
             description.getStyleClass().add("empty-msg-list-description");
             this.getChildren().add(description);
+        }
+    }
+
+    public class ReplyItem extends TextField {
+        private final Mail reply;
+        private BooleanProperty focussed;
+        private static int spaced = 0;
+
+        public ReplyItem(Mail reply) {
+            super();
+            this.reply = reply;
+            Color rColor = Color.color(Math.random(), Math.random(), Math.random());
+            this.setBorder(new Border(new BorderStroke(Color.RED, Color.RED, Color.RED, rColor,
+                    BorderStrokeStyle.NONE, BorderStrokeStyle.NONE, BorderStrokeStyle.NONE, BorderStrokeStyle.SOLID,
+                    CornerRadii.EMPTY, new BorderWidths(3), Insets.EMPTY)));
+            this.getStyleClass().add("reply-item");
+            this.styleProperty().set(String.format("-fx-text-fill: %s;", toHexString(rColor)));
+            this.setText(getReplyText());
+            this.setEditable(false);
+        }
+
+        public Mail getReply() {
+            return reply;
+        }
+
+        private static String toHexString(Color color) {
+            int r = ((int) Math.round(color.getRed() * 255)) << 24;
+            int g = ((int) Math.round(color.getGreen() * 255)) << 16;
+            int b = ((int) Math.round(color.getBlue() * 255)) << 8;
+            int a = ((int) Math.round(color.getOpacity() * 255));
+            return String.format("#%08X", (r + g + b + a));
+        }
+
+        public String getReplyText() {
+            return "on date: " + reply.getDate()
+                    + " <" + reply.getSource() + ">" + " have wrote: "
+                    + "\n" + reply.getContent();
         }
     }
 
@@ -596,18 +667,24 @@ public class Controller {
 
         private void getMailboxList()
                 throws IOException, ClassNotFoundException {
-            //Saving msg list
+
             msglist = connection.mailListRequest(mailbox);
 
             if (msglist == null || msglist.size() == 0) {
                 showEmptySection();
             } else {
                 Platform.runLater(() -> {
-                    selected_msg_n.setText(Integer.toString(msglist.size()) + " messages");
+                    selected_msg_n.setText(msglist.size() + " messages");
                     selected_mail_list.getChildren().clear();
                     for (Mail mail : msglist) {
-                        selected_mail_list.getChildren().addAll(createMailItem(mail));
+                        selected_mail_list.getChildren().
+                                addAll(createMailItem(mail));
                     }
+//                    if (selected_mail_list.getChildren().size() > 0)
+//                        selected_mail_list.getChildren()
+//                                .get(0)
+//                                .getStyleClass()
+//                                .add("mailbox-list-item-first");
                 });
             }
         }
@@ -622,7 +699,7 @@ public class Controller {
 
         private VBox createMailItem(Mail mail) {
             // MailItem
-            mailItem new_msg = new mailItem(mail);
+            MailItem new_msg = new MailItem(mail);
             new_msg.getStyleClass().add("mailbox-list-item");
             new_msg.setMaxHeight(MAIL_ITEM_MAX_H);
 
@@ -641,7 +718,7 @@ public class Controller {
             trash.getStyleClass().addAll("mailbox-list-item-menu");
 
             move.getItems().addAll(inbox, spam, trash);
-            move.getStyleClass().addAll("mailbox-list-item-menu");
+            move.getStyleClass().add("mailbox-list-item-menu");
 
             inbox.setOnAction(e -> {
                 if (!(mail.getBelonging().equals("inbox"))) {
@@ -701,8 +778,16 @@ public class Controller {
             new_msg.getChildren().addAll(source_lb, title_lb, cont_lb);
 
             new_msg.setOnMouseClicked(e -> {
+                if (lastFocussed == null || lastFocussed != new_msg) {
+                    if (lastFocussed != null)
+                        lastFocussed.getStyleClass().remove("mailbox-list-item__focussed");
+                    lastFocussed = new_msg;
+                }
+                new_msg.getStyleClass().add("mailbox-list-item__focussed");
+
                 new Thread(new showMailThread(new_msg.getMailbind())).start();
             });
+
             return new_msg;
         }
     }
@@ -851,6 +936,13 @@ public class Controller {
     }
 
     public class sendMailThread implements Runnable {
+
+        private boolean reply = false;
+
+        public sendMailThread(boolean reply) {
+            this.reply = reply;
+        }
+
         @Override
         public void run() {
             try {
@@ -949,17 +1041,73 @@ public class Controller {
             Platform.runLater(() -> {
                 clearSelectedMail();
                 fillMailContent();
-                actMail = toShow;
+                selectedMail = toShow;
             });
         }
 
         private void fillMailContent() {
-            mail_head_sender_icon.setText(toShow.getSource().charAt(0) + "");
-            mail_content_sender.setText(toShow.getSource());
-            mail_content_to.setText(toShow.getDests().toString());
-//            mail_content_date.setText(toShow.getDate().toString());
-            mail_content_title.setText(toShow.getObject());
-            mail_description.setText(toShow.getContent());
+            VBox mail = getNewMailReply(toShow);
+            mail.getStyleClass().add("mail-content-last-reply");
+            mail_content_replies_wrap.getChildren().add(mail);
+            //
+            for (Mail reply : toShow.getReplies()) {
+                mail_content_replies_wrap.getChildren().add(getNewMailReply(reply));
+            }
+        }
+
+        private VBox getNewMailReply(Mail reply) {
+            VBox n_reply = new VBox();
+            n_reply.getStyleClass().add("mail-content");
+
+            HBox mail_head = new HBox();
+            mail_head.getStyleClass().add("mail-head");
+            mail_head.setAlignment(Pos.CENTER_LEFT);
+
+            AnchorPane.setTopAnchor(mail_head, 0.0);
+            AnchorPane.setLeftAnchor(mail_head, 0.0);
+            AnchorPane.setRightAnchor(mail_head, 0.0);
+            AnchorPane.setBottomAnchor(mail_head, 501.0);
+
+            Label icon_sender = new Label();
+            icon_sender.setPrefHeight(50);
+            icon_sender.setPrefWidth(50);
+            icon_sender.setAlignment(Pos.CENTER);
+            icon_sender.getStyleClass().add("mail-head-sender-icon");
+            //HEAD
+            VBox mid_head = new VBox();
+            HBox.setHgrow(mid_head, Priority.ALWAYS);
+            mid_head.setAlignment(Pos.CENTER_LEFT);
+            mid_head.getStyleClass().add("mid-head");
+            Label source = new Label();
+            source.getStyleClass().add("mail-content-title");
+            Label dests = new Label();
+            dests.getStyleClass().add("mail-content-to");
+            mid_head.getChildren().addAll(source, dests);
+            //
+            Label date = new Label();
+            date.getStyleClass().add("mail-content-date");
+            mail_head.getChildren().addAll(icon_sender, mid_head, date);
+
+            Label title2 = new Label();
+            title2.getStyleClass().add("mail-content-title");
+
+            VBox mail_description_outer = new VBox();
+            mail_description_outer.getStyleClass().add("mail-description-outer");
+            Label mail_description = new Label(reply.getContent());
+            mail_description.setWrapText(true);
+            mail_description.setTextAlignment(TextAlignment.JUSTIFY);
+            mail_description_outer.getChildren().add(mail_description);
+
+            n_reply.getChildren().addAll(mail_head, title2, mail_description_outer);
+
+            //
+            icon_sender.setText(reply.getSource().charAt(0) + "");
+            source.setText(reply.getSource());
+            dests.setText(reply.getDests().toString());
+            date.setText("Today");
+            title2.setText(reply.getObject());
+
+            return n_reply;
         }
     }
 

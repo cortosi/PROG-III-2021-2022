@@ -137,6 +137,7 @@ public class HandleClient implements Runnable {
 
         mail = FilesManager.getMailBox(clientAcc.getUsername(), mailbox);
 
+        System.out.println("mando " + mail);
         clientAcc.setMessages(mail);
     }
 
@@ -159,10 +160,10 @@ public class HandleClient implements Runnable {
         // Getting message from client
         Object obj = in.readObject();
 
-        if (!(obj instanceof Mail tomove))
+        if (!(obj instanceof Mail toMove))
             throw new InvalidObjectException("[Invalid Object]: Mail required for moving");
 
-        FilesManager.moveMail(clientAcc.getUsername(), tomove);
+        FilesManager.moveMail(clientAcc.getUsername(), toMove);
     }
 
     // Mail Delete
@@ -175,6 +176,16 @@ public class HandleClient implements Runnable {
             throw new InvalidObjectException("[Invalid Object]: Mail required for moving");
 
         FilesManager.rmMailFromMailbox(clientAcc.getUsername(), toDelete);
+    }
+
+    public void waitMailToReply() throws Exception {
+        // Getting message from client
+        Object obj = in.readObject();
+
+        if (!(obj instanceof Mail toReplace))
+            throw new InvalidObjectException("[Invalid Object]: Mail required for moving");
+
+        FilesManager.replaceMail(clientAcc.getUsername(), toReplace);
     }
 
     @Override
@@ -230,7 +241,7 @@ public class HandleClient implements Runnable {
                             case REPLY_REQ -> {
                                 System.out.println(
                                         "[" + Thread.currentThread() + "]: Reply Message...");
-                                waitMailToDelete();
+                                waitMailToReply();
                             }
                         }
                     } else

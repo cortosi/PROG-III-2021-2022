@@ -115,6 +115,11 @@
 
 /* Folders Section */
 
+.folders-btn {
+    -fx-font-weight: bold;
+    -fx-font-size: 1.3em;
+}
+
 .folders-section-wrap {
     -fx-background-color: #f8f8fc;
 }
@@ -168,7 +173,8 @@
     -fx-text-fill: #76767b;
 }
 
-.selected-mail-list-wrap {
+.selected-mail-list-wrap,
+.reply-area {
     -fx-background: #FFFFFF;
     -fx-border-color: #FFFFFF;
     -fx-background-insets: 0;
@@ -179,13 +185,22 @@
 .mailbox-list-item {
     -fx-min-height: 100;
     -fx-background-radius: 10;
-    -fx-padding: 5 0;
+    -fx-padding: 5;
     -fx-max-height: 90;
-    -fx-alignment: center-left;
-    -fx-border-style: hidden hidden solid hidden;
+    /*-fx-alignment: center-left;*/
+    -fx-border-style: solid hidden hidden hidden;
     -fx-border-color: #b4b4b6;
     -fx-cursor: hand;
     -fx-spacing: 2;
+}
+
+.mailbox-list-item__focussed {
+    -fx-background-color: #0071EB;
+    -fx-border-style: hidden hidden hidden hidden;
+}
+
+.mailbox-list-item__focussed * {
+    -fx-text-fill: white;
 }
 
 .mailbox-list-item-source {
@@ -231,8 +246,12 @@
     -fx-font-family: "SF UI Text";
 }
 
-.mailbox-list-item-last {
+.mailbox-list-item-first {
     -fx-border-style: hidden;
+}
+
+.mailbox-list-item-last {
+    -fx-border-style: solid hidden hidden hidden;
 }
 
 .empty-msg-list {
@@ -253,13 +272,21 @@
 }
 
 .mail-content-wrap {
+    -fx-padding: 5;
 }
 
 .mail-content {
     -fx-background-radius: 10;
     -fx-background-color: #ffffff;
-    -fx-padding: 0 15;
+    -fx-background-insets: 0;
+    -fx-padding: 10;
     -fx-font-size: 1.4em;
+    -fx-spacing: 10;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.8), 3, 0, 0, 0);
+}
+
+.mail-content-last-reply {
+    -fx-effect: dropshadow(three-pass-box, rgb(0, 84, 184), 3, 0, 0, 0) !important;
 }
 
 .mail-content-outer {
@@ -269,6 +296,11 @@
 .mail-head {
     -fx-border-style: hidden hidden solid hidden;
     -fx-border-color: #E4E4E6;
+    -fx-padding: 10 0;
+    -fx-spacing: 10;
+}
+
+.mid-head {
 }
 
 .mail-head-sender-icon {
@@ -306,9 +338,14 @@
     -fx-background-insets: 0;
 }
 
+.mail-description-outer {
+    -fx-padding: 0 20;
+}
+
 /* New Mail */
 
-.new-mail-outer {
+.new-mail-outer,
+.reply-mail-window {
     -fx-background-color: rgba(33, 37, 41, 0.7);
 }
 
@@ -341,7 +378,8 @@
     -fx-font-size: 1.2em;
 }
 
-.new-mail-datafield {
+.new-mail-datafield,
+.reply-mail-datafield {
     -fx-text-box-border: transparent;
     -fx-background-color: #FFFFFF;
     -fx-font-size: 1.2em;
@@ -355,13 +393,17 @@
     -fx-cursor: hand !important;
 }
 
-.new-mail-content {
+.new-mail-content,
+.reply-mail-content,
+.reply-item {
     -fx-text-box-border: transparent;
     -fx-background-color: #FFFFFF;
     -fx-font-size: 1.4em;
 }
 
-.new-mail-content .content {
+.new-mail-content .content,
+.reply-mail-content .content,
+.reply-item .content {
     -fx-background-color: #FFFFFF;
     -fx-padding: 5;
 }
@@ -410,7 +452,22 @@
     -fx-background-radius: 10;
 }
 
-.reply-box-item-desc{
+.reply-box-item-desc {
     -fx-text-fill: #0071eb;
     -fx-font-weight: bold;
+}
+
+.reply-mail-content {
+
+}
+
+.mail-content-replies-outer {
+    -fx-background: #FFFFFF;
+    -fx-border-color: #FFFFFF;
+    -fx-background-insets: 0;
+    /*-fx-background-radius: 30;*/
+}
+
+.mail-content-replies-wrap {
+    -fx-padding: 5;
 }

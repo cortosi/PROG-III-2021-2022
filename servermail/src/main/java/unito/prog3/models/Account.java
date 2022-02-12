@@ -11,7 +11,6 @@ public class Account implements Serializable {
     private String username;
     private String password;
     private ArrayList<Mail> mail;
-    private int received = 0;
 
     public Account() {
 
@@ -43,9 +42,6 @@ public class Account implements Serializable {
         return mail;
     }
 
-    public int getReceived() {
-        return received;
-    }
 
     public void setMessages(ArrayList<Mail> mail) {
         this.mail = mail;
@@ -62,11 +58,7 @@ public class Account implements Serializable {
     public void setMail(ArrayList<Mail> mail) {
         this.mail = mail;
     }
-
-    public void setReceived(int received) {
-        this.received = received;
-    }
-
+    
     @Override
     public String toString() {
         return "Account{" +
