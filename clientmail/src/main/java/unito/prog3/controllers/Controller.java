@@ -1,6 +1,7 @@
 package unito.prog3.controllers;
 
 import java.io.IOException;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
@@ -10,12 +11,16 @@ import java.util.regex.Pattern;
 import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -27,6 +32,7 @@ import unito.prog3.clientmail.Connection;
 import unito.prog3.clientmail.MailClient;
 import unito.prog3.models.Account;
 import unito.prog3.models.Mail;
+import unito.prog3.utils.Protocol;
 import unito.prog3.utils.Security;
 
 public class Controller {
@@ -35,7 +41,7 @@ public class Controller {
     private Account my_acc;
     private ArrayList<Mail> msglist;
     private Mail selectedMail;
-    private VBox lastFocussed;
+    private MailItem lastFocussed;
 
     // Connection Interface
     private Connection connection;
@@ -527,6 +533,79 @@ public class Controller {
         animation.play();
     }
 
+    public void showMail(Mail toShow) {
+        clearSelectedMail();
+
+        VBox mail = getNewMailReply(toShow);
+        mail.getStyleClass().add("mail-content-last-reply");
+        mail_content_replies_wrap.getChildren().add(mail);
+        //
+        Mail act = toShow.getPrec();
+        while (act != null) {
+            mail_content_replies_wrap.getChildren().add(getNewMailReply(act));
+            act = act.getPrec();
+        }
+
+        selectedMail = toShow;
+    }
+
+    private VBox getNewMailReply(Mail reply) {
+        VBox n_reply = new VBox();
+        n_reply.getStyleClass().add("mail-content");
+
+        HBox mail_head = new HBox();
+        mail_head.getStyleClass().add("mail-head");
+        mail_head.setAlignment(Pos.CENTER_LEFT);
+
+        AnchorPane.setTopAnchor(mail_head, 0.0);
+        AnchorPane.setLeftAnchor(mail_head, 0.0);
+        AnchorPane.setRightAnchor(mail_head, 0.0);
+        AnchorPane.setBottomAnchor(mail_head, 501.0);
+
+        Label icon_sender = new Label();
+        icon_sender.setPrefHeight(50);
+        icon_sender.setPrefWidth(50);
+        icon_sender.setAlignment(Pos.CENTER);
+        icon_sender.getStyleClass().add("mail-head-sender-icon");
+        //HEAD
+        VBox mid_head = new VBox();
+        HBox.setHgrow(mid_head, Priority.ALWAYS);
+        mid_head.setAlignment(Pos.CENTER_LEFT);
+        mid_head.getStyleClass().add("mid-head");
+        Label source = new Label();
+        source.getStyleClass().add("mail-content-title");
+        Label dests = new Label();
+        dests.getStyleClass().add("mail-content-to");
+        mid_head.getChildren().addAll(source, dests);
+        //
+        Label date = new Label();
+        date.getStyleClass().add("mail-content-date");
+        mail_head.getChildren().addAll(icon_sender, mid_head, date);
+
+        Label title2 = new Label();
+        title2.getStyleClass().add("mail-content-title");
+
+        VBox mail_description_outer = new VBox();
+        mail_description_outer.getStyleClass().add("mail-description-outer");
+        Label mail_description = new Label(reply.getContent());
+        mail_description.setWrapText(true);
+        mail_description.setTextAlignment(TextAlignment.JUSTIFY);
+        mail_description_outer.getChildren().add(mail_description);
+
+        n_reply.getChildren().addAll(mail_head, title2, mail_description_outer);
+
+        //
+        icon_sender.setText(reply.getSource().charAt(0) + "");
+        source.setText(reply.getSource());
+        dests.setText("A: " + reply.getDests().toString()
+                .replace("[", "")
+                .replace("]", ""));
+        date.setText("Today");
+        title2.setText(reply.getObject());
+
+        return n_reply;
+    }
+
     @FXML
     public void initialize() {
         // Binding min/max to pref, to not allow the panes width change.
@@ -584,9 +663,10 @@ public class Controller {
     }
 
     // Custom JavaFX Graphics
-    public class MailItem extends VBox {
+    public class MailItem extends HBox {
+
+
         private final Mail mailbind;
-        private BooleanProperty focussed;
 
         public MailItem(Mail tobind) {
             super();
@@ -596,6 +676,8 @@ public class Controller {
         public Mail getMailbind() {
             return mailbind;
         }
+
+
     }
 
     public class EmptyMailBox extends StackPane {
@@ -652,6 +734,26 @@ public class Controller {
     }
 
     // Threads/Tasks
+    public class connectionCheck implements Runnable {
+
+        private Connection connection;
+
+        public connectionCheck(Connection connection) {
+            this.connection = connection;
+        }
+
+        @Override
+        public void run() {
+            while (true) {
+                try {
+                    connection.checkConnection();
+                } catch (SocketException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
     public class refreshMailbox implements Runnable {
 
         private final String mailbox;
@@ -697,11 +799,31 @@ public class Controller {
             });
         }
 
-        private VBox createMailItem(Mail mail) {
-            // MailItem
+        private HBox createMailItem(Mail mail) {
+
             MailItem new_msg = new MailItem(mail);
+            new_msg.setMinHeight(100);
             new_msg.getStyleClass().add("mailbox-list-item");
-            new_msg.setMaxHeight(MAIL_ITEM_MAX_H);
+
+            // Side_item
+            VBox read_section = new VBox();
+            read_section.setAlignment(Pos.TOP_CENTER);
+            read_section.getStyleClass().add("read-section");
+            read_section.setPrefWidth(20);
+            Image dotIMG = new Image(String.valueOf(MailClient.class.getResource("imgs/dot.png")));
+            ImageView dot = new ImageView(dotIMG);
+            dot.setPreserveRatio(true);
+            dot.setFitHeight(14);
+            dot.setFitWidth(25);
+            dot.getStyleClass().add("mailbox-list-item-dot");
+            if (mail.getRead() == 1)
+                dot.setVisible(false);
+            read_section.getChildren().add(dot);
+
+            // Middle
+            VBox middle = new VBox();
+            middle.getStyleClass().add("mailbox-list-item__middle");
+            middle.setMaxHeight(MAIL_ITEM_MAX_H);
 
             // Context menu
             final ContextMenu contextMenu = new ContextMenu();
@@ -732,7 +854,7 @@ public class Controller {
                     new Thread(new moveMailThread(mail)).start();
                 }
             });
-            spam.setOnAction(e -> {
+            spam.setOnAction(event -> {
                 if (!(mail.getBelonging().equals("spam"))) {
                     mail.setMoveto("spam");
                     new Thread(new moveMailThread(mail)).start();
@@ -758,7 +880,9 @@ public class Controller {
 
             contextMenu.getItems().addAll(open, reply, move, delete);
 
-            new_msg.setOnContextMenuRequested(event -> {
+            new_msg.setOnContextMenuRequested(event ->
+
+            {
                 contextMenu.setY(event.getScreenY());
                 contextMenu.setX(event.getScreenX());
                 contextMenu.show(new_msg.getScene().getWindow());
@@ -775,27 +899,25 @@ public class Controller {
             cont_lb.getStyleClass().add("mailbox-list-item-content-preview");
             cont_lb.setMaxHeight(MAIL_ITEM_MAX_H / 2);
 
-            AnchorPane read_section = new AnchorPane();
-            read_section.getStyleClass().add("read-section");
-//            Image dotIMG = new Image(String.valueOf(MailClient.class.getResource("imgs/dot.png")));
-//            ImageView dot = new ImageView(dotIMG);
-//            dot.maxHeight(10);
-//            dot.prefWidth(10);
-//            dot.getStyleClass().add("mailbox-list-item-dot");
-//            read_section.getChildren().add(dot);
-            new_msg.getChildren().addAll(read_section, source_lb, title_lb, cont_lb);
+            new_msg.getChildren().addAll(read_section, middle);
+            middle.getChildren().addAll(source_lb, title_lb, cont_lb);
 
             new_msg.setOnMouseClicked(e -> {
-                if (lastFocussed == null || lastFocussed != new_msg) {
-                    if (lastFocussed != null)
-                        lastFocussed.getStyleClass().remove("mailbox-list-item__focussed");
-                    lastFocussed = new_msg;
+                if (e.getButton() == MouseButton.PRIMARY) {
+                    if (lastFocussed == null || lastFocussed != new_msg) {
+                        if (lastFocussed != null)
+                            lastFocussed.getStyleClass().remove("mailbox-list-item__focussed");
+                        lastFocussed = new_msg;
+                    }
+                    dot.setVisible(false);
+                    new_msg.getStyleClass().add("mailbox-list-item__focussed");
+                    showMail(new_msg.getMailbind());
+                    if (new_msg.getMailbind().getRead() == 0)
+                        new Thread(new NotifyRead(new_msg.getMailbind())).start();
                 }
-                new_msg.getStyleClass().add("mailbox-list-item__focussed");
-
-                new Thread(new showMailThread(new_msg.getMailbind())).start();
             });
 
+            HBox.setHgrow(middle, Priority.ALWAYS);
             return new_msg;
         }
     }
@@ -879,6 +1001,7 @@ public class Controller {
                 login_submit_btn.setManaged(true);
                 hideLoginWindow();
                 new Thread(new refreshMailbox("inbox")).start();
+                new Thread(new connectionCheck(connection)).start();
             } else {
                 assert res != null;
                 hide_login_loader();
@@ -945,7 +1068,7 @@ public class Controller {
 
     public class sendMailThread implements Runnable {
 
-        private boolean reply = false;
+        private boolean reply;
 
         public sendMailThread(boolean reply) {
             this.reply = reply;
@@ -953,17 +1076,17 @@ public class Controller {
 
         @Override
         public void run() {
-            try {
-                if (reply) {
-                    connection.replyMailRequest();
-                    replyMail();
-                } else {
-                    connection.sendMailRequest();
-                    sendMail();
+            Platform.runLater(() -> {
+                try {
+                    if (reply) {
+                        replyMail();
+                    } else {
+                        sendMail();
+                    }
+                } catch (IOException | ClassNotFoundException e) {
+                    System.out.println("Impossibile to send email, try later");
                 }
-            } catch (IOException | ClassNotFoundException e) {
-                System.out.println("Impossibile to send email, try later");
-            }
+            });
         }
 
         private void sendMail()
@@ -985,9 +1108,10 @@ public class Controller {
             new_mail.setObject(object);
             new_mail.setContent(content);
             new_mail.setMoveto("inbox");
+            new_mail.setRead(0);
 
             // Sending Mail..
-            String res = connection.sendMessage(new_mail);
+            String res = connection.sendMessage(new_mail, false);
 
             if (res.equals("OK")) {
                 hide_new_mail();
@@ -1009,19 +1133,17 @@ public class Controller {
             newer.setObject(reply_msg_obj_datafield.getText());
             newer.setContent(reply_msg_content.getText());
             newer.setMoveto("inbox");
+            newer.setRead(0);
 
             newer.setPrec(older);
-
-            System.out.println(newer);
             // Sending Mail..
-            connection.sendMessage(newer);
+            String res = connection.sendMessage(newer, true);
 
-//            if (res.equals("OK")) {
-//                hide_new_mail();
-//                clearNewMail();
-//            } else if (res.equals("USR_NOT_EXIST")) {
-//                new_msg_to_datafield.getStyleClass().add("new-mail-wrong-to");
-//            }
+            if (res.equals("OK")) {
+                hide_reply_mail();
+                clearReplyMail();
+            } else if (res.equals("USR_NOT_EXIST")) {
+            }
         }
     }
 
@@ -1037,8 +1159,9 @@ public class Controller {
         public void run() {
             // Move request
             try {
-                connection.moveMailRequest(toMove);
+                connection.forwardMessage(toMove, Protocol.MOVE_REQ);
                 Platform.runLater(() -> {
+                    showEmptySelectedMail();
                     clearMailboxList();
                     new Thread(new refreshMailbox(toMove.getBelonging().toLowerCase())).start();
                 });
@@ -1060,7 +1183,7 @@ public class Controller {
         public void run() {
             // Move request
             try {
-                connection.delMailRequest(toDelete);
+                connection.forwardMessage(toDelete, Protocol.DEL_REQ);
                 Platform.runLater(() -> {
                     clearMailboxList();
                     new Thread(new refreshMailbox(toDelete.getBelonging().toLowerCase())).start();
@@ -1071,91 +1194,22 @@ public class Controller {
         }
     }
 
-    public class showMailThread implements Runnable {
+    public class NotifyRead implements Runnable {
 
-        private final Mail toShow;
+        private Mail toNotify;
 
-        public showMailThread(Mail toShow) {
-            this.toShow = toShow;
+        public NotifyRead(Mail toNotify) {
+            this.toNotify = toNotify;
         }
 
         @Override
         public void run() {
-            Platform.runLater(() -> {
-                clearSelectedMail();
-                fillMailContent();
-                selectedMail = toShow;
-            });
-        }
-
-        private void fillMailContent() {
-            VBox mail = getNewMailReply(toShow);
-            mail.getStyleClass().add("mail-content-last-reply");
-            mail_content_replies_wrap.getChildren().add(mail);
-            //
-            Mail act = toShow.getPrec();
-            while (act != null) {
-                mail_content_replies_wrap.getChildren().add(getNewMailReply(act));
-                act = act.getPrec();
+            try {
+                connection.forwardMessage(toNotify, Protocol.NOTIFY_READ);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
-    }
-
-    private VBox getNewMailReply(Mail reply) {
-        VBox n_reply = new VBox();
-        n_reply.getStyleClass().add("mail-content");
-
-        HBox mail_head = new HBox();
-        mail_head.getStyleClass().add("mail-head");
-        mail_head.setAlignment(Pos.CENTER_LEFT);
-
-        AnchorPane.setTopAnchor(mail_head, 0.0);
-        AnchorPane.setLeftAnchor(mail_head, 0.0);
-        AnchorPane.setRightAnchor(mail_head, 0.0);
-        AnchorPane.setBottomAnchor(mail_head, 501.0);
-
-        Label icon_sender = new Label();
-        icon_sender.setPrefHeight(50);
-        icon_sender.setPrefWidth(50);
-        icon_sender.setAlignment(Pos.CENTER);
-        icon_sender.getStyleClass().add("mail-head-sender-icon");
-        //HEAD
-        VBox mid_head = new VBox();
-        HBox.setHgrow(mid_head, Priority.ALWAYS);
-        mid_head.setAlignment(Pos.CENTER_LEFT);
-        mid_head.getStyleClass().add("mid-head");
-        Label source = new Label();
-        source.getStyleClass().add("mail-content-title");
-        Label dests = new Label();
-        dests.getStyleClass().add("mail-content-to");
-        mid_head.getChildren().addAll(source, dests);
-        //
-        Label date = new Label();
-        date.getStyleClass().add("mail-content-date");
-        mail_head.getChildren().addAll(icon_sender, mid_head, date);
-
-        Label title2 = new Label();
-        title2.getStyleClass().add("mail-content-title");
-
-        VBox mail_description_outer = new VBox();
-        mail_description_outer.getStyleClass().add("mail-description-outer");
-        Label mail_description = new Label(reply.getContent());
-        mail_description.setWrapText(true);
-        mail_description.setTextAlignment(TextAlignment.JUSTIFY);
-        mail_description_outer.getChildren().add(mail_description);
-
-        n_reply.getChildren().addAll(mail_head, title2, mail_description_outer);
-
-        //
-        icon_sender.setText(reply.getSource().charAt(0) + "");
-        source.setText(reply.getSource());
-        dests.setText("A: " + reply.getDests().toString()
-                .replace("[", "")
-                .replace("]", ""));
-        date.setText("Today");
-        title2.setText(reply.getObject());
-
-        return n_reply;
     }
 }
 

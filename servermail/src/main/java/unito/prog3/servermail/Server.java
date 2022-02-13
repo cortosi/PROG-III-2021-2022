@@ -24,13 +24,12 @@ public class Server implements Runnable {
     private final ServerSocket notifySocket;
 
     private static HashMap<String, Account> accounts;
-    private static HashMap<String, Socket> connections;
 
     public Server(final int port)
             throws IOException {
         this.clientSocket = new ServerSocket(port);
         this.notifySocket = new ServerSocket(NOTIFY_PORT);
-        this.accounts = new HashMap<String, Account>();
+        accounts = new HashMap<>();
     }
 
     public Socket waitClient()
@@ -49,15 +48,14 @@ public class Server implements Runnable {
         return (accounts.get(username));
     }
 
-    public void loadUsersList()
-            throws Exception {
+    public void loadUsersList() {
         ArrayList<Account> accountList = FilesManager.getUsers();
 
         if (accountList == null)
             return;
 
         for (Account account : accountList) {
-            loadUser(account);
+            accounts.put(account.getUsername(), account);
         }
     }
 
@@ -65,28 +63,8 @@ public class Server implements Runnable {
         if (acc == null)
             throw new IllegalArgumentException();
 
-        accounts.put(acc.getUsername(), acc);
-    }
-
-    public String sendMail(Mail msg)
-            throws IOException {
-        // Save mail into sent mailbox
-        FilesManager.addSentMail(msg.getSource(), msg);
-
-        // Extract destinations
-        ArrayList<String> dests = msg.getDests();
-
-        // Check for destinations exist
-        for (String dest : dests) {
-            if (!accounts.containsKey(dest))
-                return "USR_NOT_EXIST";
-        }
-
-        // Saving Mail in destinations inboxes
-        for (String dest : dests) {
-            FilesManager.insMailToMailbox(dest, msg);
-        }
-        return "OK";
+        if (!accounts.containsKey(acc.getUsername()))
+            accounts.put(acc.getUsername(), acc);
     }
 
     public void setupFiles() throws IOException {

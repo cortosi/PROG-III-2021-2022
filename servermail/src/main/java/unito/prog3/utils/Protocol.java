@@ -7,6 +7,7 @@ public enum Protocol {
     SEND_MSG,
     MOVE_REQ,
     DEL_REQ,
-    REPLY_REQ
+    REPLY_REQ,
+    NOTIFY_READ
 }
 

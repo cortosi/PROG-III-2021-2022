@@ -83,6 +83,7 @@ public class FilesManager {
         return true;
     }
 
+    // Get user list
     public static ArrayList<Account> getUsers() {
 
         ObjectMapper mapper = new ObjectMapper();
@@ -152,7 +153,7 @@ public class FilesManager {
         }
     }
 
-    public static void insMailToMailbox(String user, Mail toInsert)
+    public static void insMailToMailbox(String user, Mail toInsert, boolean inc)
             throws IOException {
 
         ObjectMapper mapper = new ObjectMapper();
@@ -187,11 +188,11 @@ public class FilesManager {
             }
 
             mailBox.add(toInsert);
+            System.out.println(mailBox);
             new ObjectMapper().writeValue(json, mailBox);
         }
-
-        //
-        incLastID();
+        if (inc)
+            incLastID();
     }
 
     public static void addSentMail(String user, Mail toInsert)
@@ -205,6 +206,7 @@ public class FilesManager {
 
         synchronized (FILE_LOCKS.computeIfAbsent(destFile, k -> new ReentrantLock())) {
             sentMailBox = getMailBox(user, "sent");
+            toInsert.setRead(1);
             sentMailBox.add(toInsert);
             new ObjectMapper().writeValue(destFile, sentMailBox);
         }
@@ -212,7 +214,6 @@ public class FilesManager {
 
     public static void moveMail(String user, Mail toMove)
             throws Exception {
-
         if (toMove == null)
             throw new IllegalArgumentException();
 
@@ -220,7 +221,7 @@ public class FilesManager {
         rmMailFromMailbox(user, toMove);
 
         // Adding mail to dest file
-        insMailToMailbox(user, toMove);
+        insMailToMailbox(user, toMove, false);
     }
 
     public static void replyMail(String user, Mail msg)
@@ -229,7 +230,6 @@ public class FilesManager {
         if (msg == null || user == null)
             throw new IllegalArgumentException();
 
-        System.out.println(msg);
         ObjectMapper mapper = new ObjectMapper();
         ArrayList<Mail> mailBox;
 
@@ -252,13 +252,45 @@ public class FilesManager {
             }
 
             mailBox.add(msg);
-            System.out.println(mailBox);
             new ObjectMapper().writeValue(json, mailBox);
         }
-        //
-        incLastID();
     }
 
+    public static void setMailRead(String user, Mail msg)
+            throws Exception {
+
+        ObjectMapper mapper = new ObjectMapper();
+        ArrayList<Mail> mailBox;
+        boolean found = false;
+
+        if (msg == null)
+            throw new IllegalArgumentException();
+
+        File json = new File(USERS_DIR_PATH + user + "/" + msg.getBelonging() + ".json");
+
+        synchronized (FILE_LOCKS.computeIfAbsent(json, k -> new ReentrantLock())) {
+            try {
+                mailBox = mapper.readValue(json, new TypeReference<>() {
+                });
+//                System.out.println("LEGGO: " + mailBox);
+            } catch (IOException e) {
+                mailBox = new ArrayList<>();
+            }
+            for (int i = 0; i < mailBox.size() && !found; i++) {
+                if (mailBox.get(i).getId() == msg.getId()) {
+                    mailBox.get(i).setRead(1);
+                    found = true;
+                }
+            }
+//            System.out.println("RISCRIVO: " + mailBox);
+            if (found)
+                new ObjectMapper().writeValue(json, mailBox);
+            else
+                throw new Exception("Email Not found");
+        }
+    }
+
+    // ID Counter
     public static int getLastID()
             throws IOException {
         File json = new File(SERVER_FILE_PATH);

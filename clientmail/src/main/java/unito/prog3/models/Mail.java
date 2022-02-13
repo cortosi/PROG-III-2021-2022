@@ -17,7 +17,7 @@ public class Mail implements Serializable {
     private String moveto;
     private Mail prec;
     private ArrayList<String> dests;
-    private boolean read = false;
+    private int read = 0;
     private Date date;
 
     public Mail() {
@@ -60,6 +60,10 @@ public class Mail implements Serializable {
         return prec;
     }
 
+    public int getRead() {
+        return read;
+    }
+
     public void setSource(String source) {
         this.source = source;
     }
@@ -76,7 +80,7 @@ public class Mail implements Serializable {
         this.object = object;
     }
 
-    public void setRead(boolean read) {
+    public void setRead(int read) {
         this.read = read;
     }
 
@@ -99,6 +103,7 @@ public class Mail implements Serializable {
     public void setPrec(Mail prec) {
         this.prec = prec;
     }
+
 
     @Override
     public String toString() {

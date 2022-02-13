@@ -168,7 +168,7 @@
             <top>
                 <AnchorPane prefHeight="52.0" prefWidth="1165.0" styleClass="window-head" BorderPane.alignment="CENTER">
                     <children>
-                        <HBox alignment="CENTER_RIGHT" layoutX="469.0" layoutY="-31.0" prefHeight="42.0" prefWidth="1165.0" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <HBox alignment="CENTER_RIGHT" layoutX="62.0" layoutY="-31.0" prefHeight="52.0" prefWidth="1093.0" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="52.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="0.0">
                             <children>
                                 <ImageView fx:id="new_mail_btn" fitHeight="27.0" fitWidth="20.0" onMouseClicked="#show_new_mail" pickOnBounds="true" preserveRatio="true">
                                     <image>
@@ -186,6 +186,11 @@
                                 </ImageView>
                             </children>
                         </HBox>
+                  <ImageView fx:id="warging_btn" fitHeight="46.0" fitWidth="42.0" layoutX="14.0" layoutY="13.0" pickOnBounds="true" preserveRatio="true" visible="false">
+                     <image>
+                        <Image url="@../imgs/error.png" />
+                     </image>
+                  </ImageView>
                     </children>
                 </AnchorPane>
             </top>
@@ -543,5 +548,30 @@
                 </HBox>
             </children>
         </AnchorPane>
+      <AnchorPane fx:id="error_box_window" layoutX="20.0" layoutY="20.0" onMouseClicked="#closeMailReplyBox" opacity="0.0" prefHeight="726.0" prefWidth="1165.0" styleClass="error-box-window" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <VBox layoutX="23.0" layoutY="45.0" prefHeight="302.0" prefWidth="224.0" styleClass="error-box-wrap" AnchorPane.bottomAnchor="379.0" AnchorPane.leftAnchor="23.0" AnchorPane.rightAnchor="918.0" AnchorPane.topAnchor="45.0">
+               <effect>
+                  <DropShadow blurType="GAUSSIAN">
+                     <color>
+                        <Color red="0.6710526347160339" green="0.6710526347160339" blue="0.6710526347160339" />
+                     </color>
+                  </DropShadow>
+               </effect>
+               <children>
+                  <Label prefHeight="18.0" prefWidth="217.0" styleClass="error-box-head" text="Alerts" />
+                  <ScrollPane fitToHeight="true" fitToWidth="true" prefHeight="188.0" prefWidth="204.0" styleClass="error-box-list-wrap" VBox.vgrow="ALWAYS">
+                     <content>
+                        <VBox prefHeight="242.0" prefWidth="202.0" styleClass="error-box-list">
+                           <children>
+                              <HBox prefHeight="68.0" prefWidth="188.0" styleClass="error-box-item" />
+                           </children>
+                        </VBox>
+                     </content>
+                  </ScrollPane>
+               </children>
+            </VBox>
+         </children>
+      </AnchorPane>
     </children>
 </AnchorPane>

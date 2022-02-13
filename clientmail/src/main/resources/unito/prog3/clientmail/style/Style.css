@@ -157,7 +157,7 @@
 /* Side Section */
 
 .side-section {
-    -fx-padding: 10;
+    -fx-padding: 5;
     -fx-border-style: hidden solid hidden hidden;
     -fx-border-color: #E4E4E6;
 }
@@ -183,15 +183,20 @@
 /* MailBox List */
 
 .mailbox-list-item {
-    -fx-min-height: 100;
     -fx-background-radius: 10;
-    -fx-padding: 5;
-    -fx-max-height: 90;
+    -fx-cursor: hand;
+}
+
+.mailbox-list-item__middle {
+    -fx-spacing: 2;
     -fx-border-style: hidden hidden solid hidden;
     -fx-border-width: .5;
     -fx-border-color: #b4b4b6;
-    -fx-cursor: hand;
-    -fx-spacing: 2;
+    -fx-padding: 5;
+}
+
+.read-section {
+    -fx-padding: 10 0;
 }
 
 .mailbox-list-item__focussed {
@@ -425,7 +430,8 @@
     -fx-text-fill: #495057;
 }
 
-.reply-box-wrap {
+.reply-box-wrap,
+.error-box-wrap {
     -fx-background-color: #f5f5f5;
     -fx-background-radius: 10;
 }
@@ -475,9 +481,30 @@
     -fx-padding: 5;
 }
 
-.read-section {
-    -fx-padding: 0 5;
+.mailbox-list-item-dot {
 }
 
-.mailbox-list-item-dot {
+.error-box-wrap {
+    -fx-padding: 10;
+    -fx-spacing: 5;
+    -fx-background-color: #FFFFFF;
+}
+
+.error-box-head {
+    -fx-font-size: 2em;
+    -fx-font-weight: bold;
+    -fx-padding: 5 0;
+    -fx-border-style: hidden hidden solid hidden;
+    -fx-border-color: #E4E4E6;
+}
+
+.error-box-item {
+    -fx-border-style: hidden hidden solid hidden;
+    -fx-border-color: #E4E4E6;
+}
+
+.error-box-list-wrap {
+    -fx-background: #FFFFFF;
+    -fx-border-color: #FFFFFF;
+    -fx-background-insets: 0;
 }

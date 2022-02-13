@@ -137,11 +137,35 @@ public class HandleClient implements Runnable {
 
         mail = FilesManager.getMailBox(clientAcc.getUsername(), mailbox);
 
-        System.out.println("mando " + mail);
         clientAcc.setMessages(mail);
     }
 
     // Mail sending
+    public String sendMail(Mail msg, boolean reply)
+            throws IOException {
+        // Extract destinations
+        ArrayList<String> dests = msg.getDests();
+
+        // Check for destinations exist
+        for (String dest : dests) {
+            if (!server.accountExist(dest))
+                return "USR_NOT_EXIST";
+        }
+
+        // Saving Mail in destinations inboxes
+        if (!reply)
+            for (String dest : dests)
+                FilesManager.insMailToMailbox(dest, msg, true);
+        else
+            for (String dest : dests)
+                FilesManager.replyMail(dest, msg);
+
+        // Save mail into sent mailbox
+        FilesManager.addSentMail(msg.getSource(), msg);
+
+        return "OK";
+    }
+
     public void waitMailToSend()
             throws IOException, ClassNotFoundException {
         // Getting message from client
@@ -151,7 +175,7 @@ public class HandleClient implements Runnable {
             throw new InvalidObjectException("[Invalid Object]: Mail required for sending");
 
         // Sending server response
-        sendResponse(server.sendMail(mail));
+        sendResponse(sendMail(mail, false));
     }
 
     // Mail Moving
@@ -178,15 +202,30 @@ public class HandleClient implements Runnable {
         FilesManager.rmMailFromMailbox(clientAcc.getUsername(), toDelete);
     }
 
-    public void waitMailToReply() throws Exception {
+    public void waitMailToReply()
+            throws Exception {
+        // Getting message from client
+        Object obj = in.readObject();
+
+        if (!(obj instanceof Mail mail))
+            throw new InvalidObjectException("[Invalid Object]: Mail required for sending");
+
+        // Sending server response
+        sendResponse(sendMail(mail, true));
+    }
+
+    public void waitMailToNotify()
+            throws Exception {
         // Getting message from client
         Object obj = in.readObject();
 
         if (!(obj instanceof Mail msg))
             throw new InvalidObjectException("[Invalid Object]: Mail required for moving");
 
-        for (String username : msg.getDests()) {
-            FilesManager.replyMail(username, msg);
+        try {
+            FilesManager.setMailRead(clientAcc.getUsername(), msg);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -203,7 +242,6 @@ public class HandleClient implements Runnable {
             try {
                 if ((read = in.readObject()) != null) {
                     if (read instanceof Protocol) {
-                        System.out.println(read);
                         switch ((Protocol) read) {
                             case REG_REQUEST -> {
                                 System.out.println(
@@ -245,6 +283,11 @@ public class HandleClient implements Runnable {
                                 System.out.println(
                                         "[" + Thread.currentThread() + "]: Reply Message...");
                                 waitMailToReply();
+                            }
+                            case NOTIFY_READ -> {
+                                System.out.println(
+                                        "[" + Thread.currentThread() + "]: Notify Message...");
+                                waitMailToNotify();
                             }
                         }
                     } else

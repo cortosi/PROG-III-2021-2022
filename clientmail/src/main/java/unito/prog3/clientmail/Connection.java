@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 
 public class Connection {
@@ -23,6 +24,10 @@ public class Connection {
 
         out = new ObjectOutputStream(serverbound.getOutputStream());
         in = new ObjectInputStream(serverbound.getInputStream());
+    }
+
+    public void checkConnection() throws SocketException {
+        serverbound.setSoTimeout(5000);
     }
 
     public String login_request(Account acc)
@@ -43,7 +48,7 @@ public class Connection {
         out.writeObject(acc);
     }
 
-    public String getServerResponse()
+    public synchronized String getServerResponse()
             throws ClassNotFoundException, IOException {
         return (String) in.readObject();
     }
@@ -81,20 +86,15 @@ public class Connection {
             return null;
     }
 
-    public void sendMailRequest()
-            throws IOException {
-        out.writeObject(Protocol.SEND_MSG);
-    }
-
-    public void replyMailRequest()
-            throws IOException {
-        out.writeObject(Protocol.REPLY_REQ);
-    }
-
-    public String sendMessage(Mail msg)
+    public String sendMessage(Mail msg, boolean reply)
             throws IOException, ClassNotFoundException {
         if (msg == null)
             throw new IllegalArgumentException();
+
+        if (reply)
+            out.writeObject(Protocol.REPLY_REQ);
+        else
+            out.writeObject(Protocol.SEND_MSG);
 
         out.writeObject(msg);
 
@@ -102,19 +102,11 @@ public class Connection {
         return getServerResponse();
     }
 
-    public void moveMailRequest(Mail tomvoe)
+    public synchronized void forwardMessage(Mail msg, Protocol p)
             throws IOException {
-        out.writeObject(Protocol.MOVE_REQ);
+        out.writeObject(p);
 
         // Sending Mail to move
-        out.writeObject(tomvoe);
-    }
-
-    public void delMailRequest(Mail toDelete)
-            throws IOException {
-        out.writeObject(Protocol.DEL_REQ);
-
-        // Sending Mail to move
-        out.writeObject(toDelete);
+        out.writeObject(msg);
     }
 }
