@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.ArrayList;
 
 public class Connection {
@@ -26,11 +25,7 @@ public class Connection {
         in = new ObjectInputStream(serverbound.getInputStream());
     }
 
-    public void checkConnection() throws SocketException {
-        serverbound.setSoTimeout(5000);
-    }
-
-    public String login_request(Account acc)
+    public String loginRequest(Account acc)
             throws IOException, ClassNotFoundException {
         out.writeObject(Protocol.LOGIN_REQUEST);
 
@@ -70,23 +65,25 @@ public class Connection {
         }
     }
 
-    public ArrayList<Mail> mailListRequest(String mailbox)
+    public ArrayList<Mail> mailboxRequest(String mailbox, String username)
             throws IOException, ClassNotFoundException {
         // Request
         out.writeObject(Protocol.MAILBOX_LIST);
 
         // Sending mailbox
         out.writeObject(mailbox);
+        out.writeObject(username);
 
         // Getting msgs list
         Object res = in.readObject();
+
         if (res instanceof ArrayList<?>) {
             return ((ArrayList<Mail>) res);
         } else
             return null;
     }
 
-    public String sendMessage(Mail msg, boolean reply)
+    public String sendMessage(String username, Mail msg, boolean reply)
             throws IOException, ClassNotFoundException {
         if (msg == null)
             throw new IllegalArgumentException();
@@ -97,16 +94,17 @@ public class Connection {
             out.writeObject(Protocol.SEND_MSG);
 
         out.writeObject(msg);
+        out.writeObject(username);
 
         // Wait response
         return getServerResponse();
     }
 
-    public synchronized void forwardMessage(Mail msg, Protocol p)
+    public synchronized void editMessage(String username, Mail msg, Protocol p)
             throws IOException {
         out.writeObject(p);
-
-        // Sending Mail to move
         out.writeObject(msg);
+
+        out.writeObject(username);
     }
 }

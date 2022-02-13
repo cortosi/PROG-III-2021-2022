@@ -1,19 +1,13 @@
 package unito.prog3.controllers;
 
 import java.io.IOException;
-import java.net.SocketException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javafx.animation.*;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -42,9 +36,9 @@ public class Controller {
     private ArrayList<Mail> msglist;
     private Mail selectedMail;
     private MailItem lastFocussed;
-
-    // Connection Interface
-    private Connection connection;
+    private String IPV4;
+    private int PORT;
+    private String selFolder = "inbox";
 
     // GP variables
     private static final String IPV4_PATTERN = "^(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])(\\.(?!$)|$)){4}$";
@@ -227,6 +221,9 @@ public class Controller {
     @FXML
     private Label signup_wrong_input;
 
+    public Controller() {
+    }
+
     // Login/Signup
     @FXML
     public void login() {
@@ -235,7 +232,7 @@ public class Controller {
 
     @FXML
     public void signUp() {
-        new Thread(new signUpThread()).start();
+//        new Thread(new signUpThread()).start();
     }
 
     @FXML
@@ -352,13 +349,14 @@ public class Controller {
     }
 
     @FXML
-    public void onFolderClick(MouseEvent me) {
+    public void onFolderClick(MouseEvent me) throws IOException {
         HBox hb = (HBox) me.getSource();
         Label l = (Label) hb.getChildren().get(1);
 
+        selFolder = l.getText().toLowerCase();
         clearMailboxList();
 
-        new Thread(new refreshMailbox(l.getText().toLowerCase())).start();
+        new Thread(new refreshMailbox(l.getText().toLowerCase(), new Connection(IPV4, PORT))).start();
 
         // Closing folder section
         close_folders();
@@ -399,11 +397,11 @@ public class Controller {
     }
 
     @FXML
-    private void send_new_mail(MouseEvent e) {
+    private void send_new_mail(MouseEvent e) throws IOException {
         if (e.getSource() == new_msg_send_btn)
-            new Thread(new sendMailThread(false)).start();
+            new Thread(new sendMailThread(false, new Connection(IPV4, PORT))).start();
         else
-            new Thread(new sendMailThread(true)).start();
+            new Thread(new sendMailThread(true, new Connection(IPV4, PORT))).start();
     }
 
     // Reply Box Functions
@@ -429,7 +427,7 @@ public class Controller {
 
     }
 
-    // 
+    //
     public void clearMailboxList() {
         // Clearing Mail List (GUI)
         selected_mail_list.getChildren().clear();
@@ -490,14 +488,14 @@ public class Controller {
     }
 
     @FXML
-    public void deleteSelectedMail() {
+    public void deleteSelectedMail() throws IOException {
         if (selectedMail.getBelonging().equals("trash")) {
             showEmptySelectedMail();
-            new Thread(new delMailThread(selectedMail)).start();
+            new Thread(new delMailThread(selectedMail, new Connection(IPV4, PORT))).start();
         } else {
             selectedMail.setMoveto("trash");
             showEmptySelectedMail();
-            new Thread(new moveMailThread(selectedMail)).start();
+            new Thread(new moveMailThread(selectedMail, new Connection(IPV4, PORT))).start();
         }
     }
 
@@ -734,20 +732,15 @@ public class Controller {
     }
 
     // Threads/Tasks
-    public class connectionCheck implements Runnable {
-
-        private Connection connection;
-
-        public connectionCheck(Connection connection) {
-            this.connection = connection;
-        }
+    public class keepUpdate implements Runnable {
 
         @Override
         public void run() {
             while (true) {
                 try {
-                    connection.checkConnection();
-                } catch (SocketException e) {
+                    new Thread(new refreshMailbox(selFolder, new Connection(IPV4, PORT))).start();
+                    Thread.sleep(3000);
+                } catch (IOException | InterruptedException e) {
                     e.printStackTrace();
                 }
             }
@@ -757,10 +750,13 @@ public class Controller {
     public class refreshMailbox implements Runnable {
 
         private final String mailbox;
+        private final Connection connection;
+
         private static final double MAIL_ITEM_MAX_H = 100.0;
 
-        public refreshMailbox(String mailbox) {
+        public refreshMailbox(String mailbox, Connection connection) {
             this.mailbox = mailbox;
+            this.connection = connection;
         }
 
         @Override
@@ -775,8 +771,7 @@ public class Controller {
         private void getMailboxList()
                 throws IOException, ClassNotFoundException {
 
-            msglist = connection.mailListRequest(mailbox);
-
+            msglist = connection.mailboxRequest(mailbox, my_acc.getUsername());
             if (msglist == null || msglist.size() == 0) {
                 showEmptySection();
             } else {
@@ -845,19 +840,31 @@ public class Controller {
             inbox.setOnAction(e -> {
                 if (!(mail.getBelonging().equals("inbox"))) {
                     mail.setMoveto("inbox");
-                    new Thread(new moveMailThread(mail)).start();
+                    try {
+                        new Thread(new moveMailThread(mail, new Connection(IPV4, PORT))).start();
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
                 }
             });
             trash.setOnAction(e -> {
                 if (!(mail.getBelonging().equals("trash"))) {
                     mail.setMoveto("trash");
-                    new Thread(new moveMailThread(mail)).start();
+                    try {
+                        new Thread(new moveMailThread(mail, new Connection(IPV4, PORT))).start();
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
                 }
             });
             spam.setOnAction(event -> {
                 if (!(mail.getBelonging().equals("spam"))) {
                     mail.setMoveto("spam");
-                    new Thread(new moveMailThread(mail)).start();
+                    try {
+                        new Thread(new moveMailThread(mail, new Connection(IPV4, PORT))).start();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             });
 
@@ -866,9 +873,17 @@ public class Controller {
             delete.setOnAction(e -> {
                 if (!(mail.getBelonging().equals("trash"))) {
                     mail.setMoveto("trash");
-                    new Thread(new moveMailThread(mail)).start();
+                    try {
+                        new Thread(new moveMailThread(mail, new Connection(IPV4, PORT))).start();
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
                 } else {
-                    new Thread(new delMailThread(mail)).start();
+                    try {
+                        new Thread(new delMailThread(mail, new Connection(IPV4, PORT))).start();
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
                 }
             });
 
@@ -912,8 +927,13 @@ public class Controller {
                     dot.setVisible(false);
                     new_msg.getStyleClass().add("mailbox-list-item__focussed");
                     showMail(new_msg.getMailbind());
-                    if (new_msg.getMailbind().getRead() == 0)
-                        new Thread(new NotifyRead(new_msg.getMailbind())).start();
+                    if (new_msg.getMailbind().getRead() == 0) {
+                        try {
+                            new Thread(new NotifyRead(new_msg.getMailbind(), new Connection(IPV4, PORT))).start();
+                        } catch (IOException ex) {
+                            ex.printStackTrace();
+                        }
+                    }
                 }
             });
 
@@ -935,11 +955,15 @@ public class Controller {
             }
 
             Platform.runLater(() -> {
-                login();
+                try {
+                    login();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             });
         }
 
-        private void login() {
+        private void login() throws IOException {
             String inputUser = login_usr_field.getText();
             String inputPass = login_psw_field.getText();
             String inputNet = login_net_field.getText();
@@ -965,10 +989,12 @@ public class Controller {
                 if (IPV4matcher.find()) {
                     if (PORTmatcher.find()) {
                         try {
-                            connection = new Connection(ipv4addr, Integer.parseInt(port));
+                            IPV4 = ipv4addr;
+                            PORT = Integer.parseInt(port);
 
                             // Login request
-                            String auth = connection.login_request(new Account(inputUser, Security.encryptSHA(inputPass)));
+                            Connection connection = new Connection(ipv4addr, Integer.parseInt(port));
+                            String auth = connection.loginRequest(new Account(inputUser, Security.encryptSHA(inputPass)));
                             if (auth != null) {
                                 if (auth.equals("AUTH"))
                                     passed = true;
@@ -1000,8 +1026,8 @@ public class Controller {
                 head_username.setText(my_acc.getUsername());
                 login_submit_btn.setManaged(true);
                 hideLoginWindow();
-                new Thread(new refreshMailbox("inbox")).start();
-                new Thread(new connectionCheck(connection)).start();
+                new Thread(new refreshMailbox("inbox", new Connection(IPV4, PORT))).start();
+                new Thread(new keepUpdate()).start();
             } else {
                 assert res != null;
                 hide_login_loader();
@@ -1028,49 +1054,51 @@ public class Controller {
         }
     }
 
-    public class signUpThread implements Runnable {
-
-        @Override
-        public void run() {
-            Platform.runLater(() -> {
-                try {
-                    signUp();
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                }
-            });
-        }
-
-        private void signUp()
-                throws ClassNotFoundException {
-
-            // Extracting fields
-            String username = signup_usr_field.getText();
-            String password = signup_psw_field.getText();
-
-            // Regex check
-            Pattern emailPattern = Pattern.compile(EMAIL_PATTERN, Pattern.CASE_INSENSITIVE);
-            Matcher emailMatcher = emailPattern.matcher(username);
-
-            if (emailMatcher.find()) {
-                if (password.length() != 0) {
-                    // Encryption
-                    password = Security.encryptSHA(password);
-
-                    Account new_acc = new Account(username, password);
-
-                    String res = connection.signupRequest(new_acc);
-                }
-            } else
-                show_signup_wrong("Wrong Username");
-        }
-    }
+//    public class signUpThread implements Runnable {
+//
+//        @Override
+//        public void run() {
+//            Platform.runLater(() -> {
+//                try {
+//                    signUp();
+//                } catch (ClassNotFoundException e) {
+//                    e.printStackTrace();
+//                }
+//            });
+//        }
+//
+//        private void signUp()
+//                throws ClassNotFoundException {
+//
+//            // Extracting fields
+//            String username = signup_usr_field.getText();
+//            String password = signup_psw_field.getText();
+//
+//            // Regex check
+//            Pattern emailPattern = Pattern.compile(EMAIL_PATTERN, Pattern.CASE_INSENSITIVE);
+//            Matcher emailMatcher = emailPattern.matcher(username);
+//
+//            if (emailMatcher.find()) {
+//                if (password.length() != 0) {
+//                    // Encryption
+//                    password = Security.encryptSHA(password);
+//
+//                    Account new_acc = new Account(username, password);
+//
+//                    String res = connection.signupRequest(new_acc);
+//                }
+//            } else
+//                show_signup_wrong("Wrong Username");
+//        }
+//    }
 
     public class sendMailThread implements Runnable {
 
-        private boolean reply;
+        private final boolean reply;
+        private final Connection connection;
 
-        public sendMailThread(boolean reply) {
+        public sendMailThread(boolean reply, Connection connection) {
+            this.connection = connection;
             this.reply = reply;
         }
 
@@ -1111,7 +1139,7 @@ public class Controller {
             new_mail.setRead(0);
 
             // Sending Mail..
-            String res = connection.sendMessage(new_mail, false);
+            String res = connection.sendMessage(my_acc.getUsername(), new_mail, false);
 
             if (res.equals("OK")) {
                 hide_new_mail();
@@ -1127,17 +1155,17 @@ public class Controller {
             Mail older = selectedMail;
             Mail newer = new Mail();
 
-            // Saving data
+            // Saving Mail data
             newer.setSource(my_acc.getUsername());
-            newer.setDests(new ArrayList<>(Arrays.asList(older.getSource())));
+            newer.setDests(new ArrayList<>(List.of(older.getSource())));
             newer.setObject(reply_msg_obj_datafield.getText());
             newer.setContent(reply_msg_content.getText());
             newer.setMoveto("inbox");
             newer.setRead(0);
-
             newer.setPrec(older);
-            // Sending Mail..
-            String res = connection.sendMessage(newer, true);
+
+            // Sending Mail to the Server
+            String res = connection.sendMessage(my_acc.getUsername(), newer, true);
 
             if (res.equals("OK")) {
                 hide_reply_mail();
@@ -1149,21 +1177,27 @@ public class Controller {
 
     public class moveMailThread implements Runnable {
 
-        private Mail toMove;
+        private final Mail toMove;
+        private final Connection connection;
 
-        public moveMailThread(Mail mail) {
+        public moveMailThread(Mail mail, Connection connection) {
             this.toMove = mail;
+            this.connection = connection;
         }
 
         @Override
         public void run() {
             // Move request
             try {
-                connection.forwardMessage(toMove, Protocol.MOVE_REQ);
+                connection.editMessage(my_acc.getUsername(), toMove, Protocol.MOVE_REQ);
                 Platform.runLater(() -> {
                     showEmptySelectedMail();
                     clearMailboxList();
-                    new Thread(new refreshMailbox(toMove.getBelonging().toLowerCase())).start();
+                    try {
+                        new Thread(new refreshMailbox(toMove.getBelonging().toLowerCase(), new Connection(IPV4, PORT))).start();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 });
             } catch (IOException e) {
                 e.printStackTrace();
@@ -1173,20 +1207,26 @@ public class Controller {
 
     public class delMailThread implements Runnable {
 
-        private Mail toDelete;
+        private final Mail toDelete;
+        private final Connection connection;
 
-        public delMailThread(Mail toDelete) {
+        public delMailThread(Mail toDelete, Connection connection) {
             this.toDelete = toDelete;
+            this.connection = connection;
         }
 
         @Override
         public void run() {
             // Move request
             try {
-                connection.forwardMessage(toDelete, Protocol.DEL_REQ);
+                connection.editMessage(my_acc.getUsername(), toDelete, Protocol.DEL_REQ);
                 Platform.runLater(() -> {
                     clearMailboxList();
-                    new Thread(new refreshMailbox(toDelete.getBelonging().toLowerCase())).start();
+                    try {
+                        new Thread(new refreshMailbox(toDelete.getBelonging().toLowerCase(), new Connection(IPV4, PORT))).start();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 });
             } catch (IOException e) {
                 e.printStackTrace();
@@ -1196,16 +1236,18 @@ public class Controller {
 
     public class NotifyRead implements Runnable {
 
-        private Mail toNotify;
+        private final Mail toNotify;
+        private final Connection connection;
 
-        public NotifyRead(Mail toNotify) {
+        public NotifyRead(Mail toNotify, Connection connection) {
             this.toNotify = toNotify;
+            this.connection = connection;
         }
 
         @Override
         public void run() {
             try {
-                connection.forwardMessage(toNotify, Protocol.NOTIFY_READ);
+                connection.editMessage(my_acc.getUsername(), toNotify, Protocol.NOTIFY_READ);
             } catch (IOException e) {
                 e.printStackTrace();
             }

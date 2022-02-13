@@ -10,6 +10,7 @@ module unito.prog3.servermail {
 
     opens unito.prog3.servermail to javafx.fxml, com.fasterxml.jackson.databind;
     opens unito.prog3.models to com.fasterxml.jackson.databind;
+    opens unito.prog3.controllers to javafx.fxml;
 
     exports unito.prog3.servermail;
 }

@@ -1,5 +1,6 @@
 package unito.prog3.servermail;
 
+import unito.prog3.controllers.Controller;
 import unito.prog3.models.Account;
 import unito.prog3.models.Mail;
 import unito.prog3.utils.FilesManager;
@@ -19,12 +20,13 @@ public class HandleClient implements Runnable {
     private Account clientAcc;
     private final Socket clientSocket;
     private final Server server;
+    private final Controller controller;
 
     private ObjectOutputStream out;
     private ObjectInputStream in;
 
     // Constructor
-    public HandleClient(Socket clientSocket, Server server)
+    public HandleClient(Socket clientSocket, Server server, Controller controller)
             throws IllegalArgumentException, IOException {
 
         if (clientSocket == null || server == null)
@@ -32,6 +34,7 @@ public class HandleClient implements Runnable {
 
         this.server = server;
         this.clientSocket = clientSocket;
+        this.controller = controller;
 
         out = new ObjectOutputStream(clientSocket.getOutputStream());
         in = new ObjectInputStream(clientSocket.getInputStream());
@@ -68,9 +71,9 @@ public class HandleClient implements Runnable {
             sendResponse("USR_EXIST");
         else {
             if (password != null) {
-                System.out.println(
-                        "[" + Thread.currentThread() + "]: Client(" + clientSocket.getInetAddress()
-                                + ") signup data accepted, saved into users file");
+//                System.out.println(
+//                        "[" + Thread.currentThread() + "]: Client(" + clientSocket.getInetAddress()
+//                                + ") signup data accepted, saved into users file");
                 sendResponse("REG");
                 createNewUser(new_acc);
             } else
@@ -93,22 +96,18 @@ public class HandleClient implements Runnable {
         if (server.accountExist(username)) {
             //Check password
             if (password.equals(server.getAccount(username).getPassword())) {
-                System.out.println(
-                        "[" + Thread.currentThread() + "]: Client(" + clientSocket.getInetAddress()
-                                + ") authenticated");
+                controller.log("Client(" + clientSocket.getInetAddress()
+                        + ") authenticated\n");
 
                 clientAcc = acc;
                 sendResponse("AUTH");
             } else {
-                System.out.println(
-                        "[" + Thread.currentThread() + "]: Client(" + clientSocket.getInetAddress()
-                                + ") rejected due password wrong");
+                controller.log("Client(" + clientSocket.getInetAddress()
+                        + ") rejected due password wrong\n");
                 sendResponse("PSW_WRONG");
             }
         } else {
-            System.out.println(
-                    "[" + Thread.currentThread() + "]: Client(" + clientSocket.getInetAddress()
-                            + ") rejected due username not exist");
+            controller.log("Client rejected due username not exist\n");
             sendResponse("USR_WRONG");
         }
     }
@@ -131,13 +130,14 @@ public class HandleClient implements Runnable {
 
         ArrayList<Mail> mail = null;
         Object obj = in.readObject();
+        String username = (String) in.readObject();
 
         if (!(obj instanceof String mailbox))
             throw new InvalidObjectException("[Invalid Object]: String required for mailbox mail");
 
-        mail = FilesManager.getMailBox(clientAcc.getUsername(), mailbox);
+        mail = FilesManager.getMailBox(username, mailbox);
 
-        clientAcc.setMessages(mail);
+        out.writeObject(mail);
     }
 
     // Mail sending
@@ -168,11 +168,14 @@ public class HandleClient implements Runnable {
 
     public void waitMailToSend()
             throws IOException, ClassNotFoundException {
+
         // Getting message from client
         Object obj = in.readObject();
 
         if (!(obj instanceof Mail mail))
             throw new InvalidObjectException("[Invalid Object]: Mail required for sending");
+
+        controller.log(mail.getSource() + " Sending mail to: " + mail.getDests().toString() + "\n");
 
         // Sending server response
         sendResponse(sendMail(mail, false));
@@ -183,11 +186,17 @@ public class HandleClient implements Runnable {
             throws Exception {
         // Getting message from client
         Object obj = in.readObject();
+        String username = (String) in.readObject();
 
         if (!(obj instanceof Mail toMove))
             throw new InvalidObjectException("[Invalid Object]: Mail required for moving");
 
-        FilesManager.moveMail(clientAcc.getUsername(), toMove);
+        controller.log(username + " Moving mail from: "
+                + toMove.getBelonging()
+                + " to: " + toMove.getMoveto() + "\n");
+
+
+        FilesManager.moveMail(username, toMove);
     }
 
     // Mail Delete
@@ -195,20 +204,29 @@ public class HandleClient implements Runnable {
             throws Exception {
         // Getting message from client
         Object obj = in.readObject();
+        String username = (String) in.readObject();
 
         if (!(obj instanceof Mail toDelete))
             throw new InvalidObjectException("[Invalid Object]: Mail required for moving");
 
-        FilesManager.rmMailFromMailbox(clientAcc.getUsername(), toDelete);
+        controller.log(username + " Deleting mail - ID: "
+                + toDelete.getId() + "\n");
+
+        FilesManager.rmMailFromMailbox(username, toDelete);
     }
 
     public void waitMailToReply()
             throws Exception {
         // Getting message from client
         Object obj = in.readObject();
+        String username = (String) in.readObject();
 
         if (!(obj instanceof Mail mail))
             throw new InvalidObjectException("[Invalid Object]: Mail required for sending");
+
+        controller.log(username + " Replying mail with ID: "
+                + mail.getId() + " to: "
+                + mail.getDests() + "\n");
 
         // Sending server response
         sendResponse(sendMail(mail, true));
@@ -218,12 +236,13 @@ public class HandleClient implements Runnable {
             throws Exception {
         // Getting message from client
         Object obj = in.readObject();
+        String username = (String) in.readObject();
 
         if (!(obj instanceof Mail msg))
             throw new InvalidObjectException("[Invalid Object]: Mail required for moving");
 
         try {
-            FilesManager.setMailRead(clientAcc.getUsername(), msg);
+            FilesManager.setMailRead(username, msg);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -234,8 +253,7 @@ public class HandleClient implements Runnable {
         // Thread Name
         // Thread.currentThread().setName("");
 
-        System.out.println(
-                "[" + Thread.currentThread() + "]: Connection established with: " + clientSocket.getInetAddress());
+        controller.log("Connection established with:" + clientSocket.getInetAddress() + "\n");
 
         while (!exit) {
             Object read = null;
@@ -244,49 +262,32 @@ public class HandleClient implements Runnable {
                     if (read instanceof Protocol) {
                         switch ((Protocol) read) {
                             case REG_REQUEST -> {
-                                System.out.println(
-                                        "[" + Thread.currentThread() + "]: check signup data");
                                 waitSignupData();
                             }
                             case LOGIN_REQUEST -> {
-                                System.out.println(
-                                        "[" + Thread.currentThread() + "]: check credentials");
                                 waitLoginData();
                             }
                             case MAILBOX_LIST -> {
-                                System.out.println(
-                                        "[" + Thread.currentThread() + "]: Loading messages");
                                 try {
                                     waitMailbox();
-                                    out.writeObject(clientAcc.getMessages());
                                 } catch (Exception e) {
                                     System.out.println(
                                             "[" + Thread.currentThread() + "]: ERROR: " + e.getMessage());
                                 }
                             }
                             case SEND_MSG -> {
-                                System.out.println(
-                                        "[" + Thread.currentThread() + "]: Reding Message...");
                                 waitMailToSend();
                             }
                             case MOVE_REQ -> {
-                                System.out.println(
-                                        "[" + Thread.currentThread() + "]: Moving Message...");
                                 waitMailToMove();
                             }
                             case DEL_REQ -> {
-                                System.out.println(
-                                        "[" + Thread.currentThread() + "]: Deleting Message...");
                                 waitMailToDelete();
                             }
                             case REPLY_REQ -> {
-                                System.out.println(
-                                        "[" + Thread.currentThread() + "]: Reply Message...");
                                 waitMailToReply();
                             }
                             case NOTIFY_READ -> {
-                                System.out.println(
-                                        "[" + Thread.currentThread() + "]: Notify Message...");
                                 waitMailToNotify();
                             }
                         }
@@ -297,8 +298,6 @@ public class HandleClient implements Runnable {
             } catch (IllegalArgumentException e) {
                 System.out.println(e.getMessage());
             } catch (IOException e) {
-                System.out.println(
-                        "[" + Thread.currentThread() + "]: CLIENT DISCONNECTED");
                 exit = true;
             } catch (ClassNotFoundException e) {
                 System.out.println("Illegal class sent");

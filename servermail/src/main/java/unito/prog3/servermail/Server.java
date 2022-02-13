@@ -1,11 +1,10 @@
 package unito.prog3.servermail;
 
 
+import unito.prog3.controllers.Controller;
 import unito.prog3.models.Account;
-import unito.prog3.models.Mail;
 import unito.prog3.utils.FilesManager;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -22,13 +21,15 @@ public class Server implements Runnable {
 
     private final ServerSocket clientSocket;
     private final ServerSocket notifySocket;
+    private final Controller controller;
 
     private static HashMap<String, Account> accounts;
 
-    public Server(final int port)
+    public Server(final int port, Controller controller)
             throws IOException {
         this.clientSocket = new ServerSocket(port);
         this.notifySocket = new ServerSocket(NOTIFY_PORT);
+        this.controller = controller;
         accounts = new HashMap<>();
     }
 
@@ -67,23 +68,39 @@ public class Server implements Runnable {
             accounts.put(acc.getUsername(), acc);
     }
 
-    public void setupFiles() throws IOException {
+    public void serverSetUp() throws IOException {
         // Check for main dir files
         if (!(Files.exists(Paths.get(USERS_DIR_PATH)))) {
             // Creating 'files' dir
             Files.createDirectories(Paths.get(USERS_DIR_PATH));
         }
+
+        loadUsersList();
+
+        for (String user : accounts.keySet()) {
+            String userdir = (USERS_DIR_PATH + user);
+            if (!(Files.exists(Paths.get(userdir)))) {
+                // Creating 'files' dir
+                FilesManager.createFiles(user);
+            }
+        }
+
     }
 
     @Override
     public void run() {
         Thread.currentThread().setName("Server");
+        try {
+            serverSetUp();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-        System.out.println("[SERVER]: START WAITING FOR CLIENTS...");
+        controller.log("[SERVER]: START WAITING FOR CLIENTS...\n");
         while (true) {
             try {
                 Socket newClient = waitClient();
-                new Thread(new HandleClient(newClient, this)).start();
+                new Thread(new HandleClient(newClient, this, controller)).start();
             } catch (IOException e) {
                 e.printStackTrace();
             }

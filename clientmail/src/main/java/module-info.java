@@ -8,5 +8,6 @@ module unito {
 
     exports unito.prog3.clientmail;
     exports unito.prog3.models;
+
     opens unito.prog3.models to javafx.fxml;
 }
