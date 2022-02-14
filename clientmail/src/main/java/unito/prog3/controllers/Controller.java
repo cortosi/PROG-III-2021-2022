@@ -44,7 +44,6 @@ public class Controller {
     private static final String IPV4_PATTERN = "^(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])(\\.(?!$)|$)){4}$";
 
     private static final String PORT_PATTERN = "^([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$";
-
     private static final String NETWORK_PATTERN = "^([0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]):([0-9]+)$";
 
     private static final String EMAIL_PATTERN = "^([a-z]|[A-Z])\\w{0,20}$";
@@ -68,6 +67,15 @@ public class Controller {
     private final EmptyMailBox empty_msg_list = new EmptyMailBox();
 
     //FXML Objs
+    @FXML
+    private AnchorPane error_box_window;
+
+    @FXML
+    private ImageView errors_btn;
+
+    @FXML
+    private VBox error_box_list;
+
     @FXML
     private ScrollPane mail_content_replies_outer;
 
@@ -531,6 +539,20 @@ public class Controller {
         animation.play();
     }
 
+    public void showErrorBtn() {
+        errors_btn.setVisible(true);
+    }
+
+    @FXML
+    public void showErrorBox() {
+        error_box_window.setVisible(true);
+    }
+
+    @FXML
+    public void closeErrorBox() {
+        error_box_window.setVisible(false);
+    }
+
     public void showMail(Mail toShow) {
         clearSelectedMail();
 
@@ -604,6 +626,27 @@ public class Controller {
         return n_reply;
     }
 
+    private void addErrorItem(String title, String content) {
+        VBox errorItem = new VBox();
+        errorItem.getStyleClass().add("error-box-item");
+
+        Label errorTitle = new Label();
+        errorTitle.getStyleClass().add("error-box-item__title");
+
+        Label errorDesc = new Label();
+        errorDesc.getStyleClass().add("error-box-item__desc");
+
+        errorTitle.setText(title);
+        errorDesc.setText(content);
+
+        errorItem.getChildren().addAll(errorTitle, errorDesc);
+
+        Platform.runLater(() -> {
+            showErrorBtn();
+            error_box_list.getChildren().add(errorItem);
+        });
+    }
+
     @FXML
     public void initialize() {
         // Binding min/max to pref, to not allow the panes width change.
@@ -658,6 +701,7 @@ public class Controller {
         new_msg_to_datafield.textProperty().addListener(e -> {
             new_msg_to_datafield.getStyleClass().removeAll("new-mail-wrong-to");
         });
+
     }
 
     // Custom JavaFX Graphics
@@ -732,16 +776,17 @@ public class Controller {
     }
 
     // Threads/Tasks
-    public class keepUpdate implements Runnable {
+    public class KeepUpdate implements Runnable {
 
         @Override
         public void run() {
             while (true) {
                 try {
+                    Thread.sleep(5000);
                     new Thread(new refreshMailbox(selFolder, new Connection(IPV4, PORT))).start();
-                    Thread.sleep(3000);
                 } catch (IOException | InterruptedException e) {
-                    e.printStackTrace();
+                    System.out.println("passo");
+                    addErrorItem("Server Unreachable", e.getMessage());
                 }
             }
         }
@@ -1027,7 +1072,10 @@ public class Controller {
                 login_submit_btn.setManaged(true);
                 hideLoginWindow();
                 new Thread(new refreshMailbox("inbox", new Connection(IPV4, PORT))).start();
-                new Thread(new keepUpdate()).start();
+                Thread pUpdate = new Thread(new KeepUpdate());
+                pUpdate.setDaemon(true);
+                pUpdate.start();
+
             } else {
                 assert res != null;
                 hide_login_loader();

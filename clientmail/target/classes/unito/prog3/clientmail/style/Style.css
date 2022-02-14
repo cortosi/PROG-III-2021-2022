@@ -501,10 +501,23 @@
 .error-box-item {
     -fx-border-style: hidden hidden solid hidden;
     -fx-border-color: #E4E4E6;
+    -fx-padding: 5 0;
+    -fx-spacing: 5;
 }
 
 .error-box-list-wrap {
     -fx-background: #FFFFFF;
     -fx-border-color: #FFFFFF;
     -fx-background-insets: 0;
+}
+
+.error-box-list{
+    -fx-background: #FFFFFF;
+    -fx-border-color: #FFFFFF;
+    -fx-background-insets: 0;
+}
+
+.error-box-item__title{
+    -fx-font-size: 1.2em;
+    -fx-font-weight: bold;
 }
