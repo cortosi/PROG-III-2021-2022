@@ -44,7 +44,7 @@
 }
 
 .login-form-psw-field {
-    -fx-border-style: solid hidden;
+    -fx-border-style: solid hidden hidden hidden;
     -fx-border-color: #d6d6d6;
 }
 
@@ -351,13 +351,14 @@
 }
 
 /* New Mail */
-
 .new-mail-outer,
-.reply-mail-window {
+.reply-mail-window,
+.fwd-mail-window {
     -fx-background-color: rgba(33, 37, 41, 0.7);
 }
 
-.new-mail-wrap {
+.new-mail-wrap,
+.fwd-mail-wrap {
     -fx-background-radius: 10;
     -fx-background-color: #FFFFFF;
     -fx-padding: 15;
@@ -387,7 +388,8 @@
 }
 
 .new-mail-datafield,
-.reply-mail-datafield {
+.reply-mail-datafield,
+.fwd-mail-datafield{
     -fx-text-box-border: transparent;
     -fx-background-color: #FFFFFF;
     -fx-font-size: 1.2em;
@@ -511,13 +513,13 @@
     -fx-background-insets: 0;
 }
 
-.error-box-list{
+.error-box-list {
     -fx-background: #FFFFFF;
     -fx-border-color: #FFFFFF;
     -fx-background-insets: 0;
 }
 
-.error-box-item__title{
+.error-box-item__title {
     -fx-font-size: 1.2em;
     -fx-font-weight: bold;
 }

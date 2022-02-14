@@ -16,7 +16,6 @@ public class Account implements Serializable {
 
     }
 
-
     public Account(String username, String password) {
         this.username = username;
         this.password = password;
@@ -58,7 +57,7 @@ public class Account implements Serializable {
     public void setMail(ArrayList<Mail> mail) {
         this.mail = mail;
     }
-    
+
     @Override
     public String toString() {
         return "Account{" +

@@ -77,6 +77,7 @@ public class FilesManager {
             }
         }
         accounts.add(new_user);
+        createFiles(new_user.getUsername());
 
         new ObjectMapper().writeValue(new File(USERS_FILE_PATH), accounts);
 
@@ -188,7 +189,6 @@ public class FilesManager {
             }
 
             mailBox.add(toInsert);
-            System.out.println(mailBox);
             new ObjectMapper().writeValue(json, mailBox);
         }
         if (inc)

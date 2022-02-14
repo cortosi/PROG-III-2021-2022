@@ -79,6 +79,7 @@ public class HandleClient implements Runnable {
             } else
                 sendResponse("PSW_ERR");
         }
+
     }
 
     public void waitLoginData()
@@ -162,7 +163,6 @@ public class HandleClient implements Runnable {
 
         // Save mail into sent mailbox
         FilesManager.addSentMail(msg.getSource(), msg);
-
         return "OK";
     }
 
@@ -252,8 +252,6 @@ public class HandleClient implements Runnable {
     public synchronized void run() {
         // Thread Name
         // Thread.currentThread().setName("");
-
-        controller.log("Connection established with:" + clientSocket.getInetAddress() + "\n");
 
         while (!exit) {
             Object read = null;

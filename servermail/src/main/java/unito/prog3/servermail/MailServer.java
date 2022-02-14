@@ -25,7 +25,9 @@ public class MailServer extends Application {
             // Stylesheets
             scene.getStylesheets().add(MailServer.class.getResource("style/style.css").toExternalForm());
             stage.show();
-            new Thread(new Server(1998, controller)).start();
+            Thread pServer = new Thread(new Server(1998, controller));
+            pServer.setDaemon(true);
+            pServer.start();
         } catch (IOException e1) {
             e1.printStackTrace();
         }

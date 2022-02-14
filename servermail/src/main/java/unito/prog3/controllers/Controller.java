@@ -10,4 +10,9 @@ public class Controller {
     public void log(String text) {
         log_area.appendText(text);
     }
+
+    @FXML
+    public void clearLog(){
+        log_area.clear();
+    }
 }

@@ -58,6 +58,7 @@ public class Connection {
             out.writeObject(Protocol.REG_REQUEST);
             // Sending credentials
             out.writeObject(new_acc);
+            System.out.println("mandato " + new_acc);
             // Getting server result
             return (String) in.readObject();
         } catch (IOException e) {

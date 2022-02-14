@@ -36,17 +36,13 @@ public class Controller {
     private ArrayList<Mail> msglist;
     private Mail selectedMail;
     private MailItem lastFocussed;
-    private String IPV4;
-    private int PORT;
+    private String IPV4 = "127.0.0.1";
+    private int PORT = 1998;
     private String selFolder = "inbox";
 
     // GP variables
-    private static final String IPV4_PATTERN = "^(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])(\\.(?!$)|$)){4}$";
-
-    private static final String PORT_PATTERN = "^([0-9]{1,4}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$";
-    private static final String NETWORK_PATTERN = "^([0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]):([0-9]+)$";
-
-    private static final String EMAIL_PATTERN = "^([a-z]|[A-Z])\\w{0,20}$";
+    private static final String USERNAME_PATTERN = "^([a-z]|[A-Z])\\w{0,20}$";
+    private static final String EMAIL_PATTERN = "^\\w+@[a-zA-Z_]+?\\.[a-zA-Z]{2,3}$";
 
     private final int folders_section_width = 200;
 
@@ -68,34 +64,58 @@ public class Controller {
 
     //FXML Objs
     @FXML
+    private VBox error_box_list;
+
+    @FXML
     private AnchorPane error_box_window;
 
     @FXML
     private ImageView errors_btn;
 
     @FXML
-    private VBox error_box_list;
-
-    @FXML
-    private ScrollPane mail_content_replies_outer;
-
-    @FXML
-    private ImageView reply_msg_send_btn;
-
-    @FXML
-    private VBox mail_content_replies_wrap;
-
-    @FXML
-    private VBox reply_mail_wrap;
+    private HBox folder_item;
 
     @FXML
     private AnchorPane folders_section;
 
     @FXML
+    private VBox folders_section_folderlist;
+
+    @FXML
+    private Label folders_section_title;
+
+    @FXML
     private StackPane folders_section_wrap;
 
     @FXML
+    private AnchorPane fwd_mail_window;
+
+    @FXML
+    private VBox fwd_mail_wrap;
+
+    @FXML
+    private TextArea fwd_msg_content;
+
+    @FXML
+    private TextField fwd_msg_obj_datafield;
+
+    @FXML
+    private ImageView fwd_msg_send_btn;
+
+    @FXML
+    private TextField fwd_msg_to_datafield;
+
+    @FXML
+    private Label fwd_msg_undo;
+
+    @FXML
     private Label head_username;
+
+    @FXML
+    private ImageView junk_btn;
+
+    @FXML
+    private HBox junk_items;
 
     @FXML
     private Pane login_loader;
@@ -104,13 +124,10 @@ public class Controller {
     private AnchorPane login_logo_wrap;
 
     @FXML
-    private TextField login_net_field;
-
-    @FXML
     private AnchorPane login_outer;
 
     @FXML
-    private TextField login_psw_field;
+    private PasswordField login_psw_field;
 
     @FXML
     private ImageView login_submit_btn;
@@ -122,34 +139,28 @@ public class Controller {
     private Label login_wrong_input;
 
     @FXML
-    private AnchorPane mail_content;
+    private AnchorPane mail_content_outer;
 
     @FXML
-    private Label mail_content_date;
+    private ScrollPane mail_content_replies_outer;
 
     @FXML
-    private Label mail_content_sender;
-
-    @FXML
-    private Label mail_content_title;
-
-    @FXML
-    private Label mail_content_to;
-
-    @FXML
-    private Label mail_description;
-
-    @FXML
-    private Label mail_head_sender_icon;
+    private VBox mail_content_replies_wrap;
 
     @FXML
     private BorderPane main;
+
+    @FXML
+    private BorderPane main_content;
 
     @FXML
     private HBox main_content_head;
 
     @FXML
     private AnchorPane main_window;
+
+    @FXML
+    private ImageView new_mail_btn;
 
     @FXML
     private AnchorPane new_mail_outer;
@@ -161,9 +172,6 @@ public class Controller {
     private TextArea new_msg_content;
 
     @FXML
-    private TextArea reply_msg_content;
-
-    @FXML
     private TextField new_msg_obj_datafield;
 
     @FXML
@@ -173,10 +181,16 @@ public class Controller {
     private TextField new_msg_to_datafield;
 
     @FXML
+    private Label new_msg_undo;
+
+    @FXML
     private VBox no_selected_mail_wrap;
 
     @FXML
     private VBox reply_area;
+
+    @FXML
+    private VBox fwd_area;
 
     @FXML
     private Label reply_box_sender;
@@ -191,16 +205,40 @@ public class Controller {
     private AnchorPane reply_box_window;
 
     @FXML
-    private AnchorPane reply_mail_window;
+    private AnchorPane reply_box_wrap;
+
+    @FXML
+    private ImageView reply_btn;
 
     @FXML
     private Label reply_mail_head_desc;
 
     @FXML
+    private Label fwd_mail_head_desc;
+
+    @FXML
+    private Label reply_mail_head_desc1;
+
+    @FXML
+    private AnchorPane reply_mail_window;
+
+    @FXML
+    private VBox reply_mail_wrap;
+
+    @FXML
+    private TextArea reply_msg_content;
+
+    @FXML
     private TextField reply_msg_obj_datafield;
 
     @FXML
+    private ImageView reply_msg_send_btn;
+
+    @FXML
     private TextField reply_msg_to_datafield;
+
+    @FXML
+    private Label reply_msg_undo;
 
     @FXML
     private VBox selected_mail_list;
@@ -209,10 +247,19 @@ public class Controller {
     private Label selected_msg_n;
 
     @FXML
+    private HBox sent_item;
+
+    @FXML
     private Label show_folders_btn;
 
     @FXML
+    private Label show_login_btn;
+
+    @FXML
     private Label show_signup_btn;
+
+    @FXML
+    private VBox side_section_mails;
 
     @FXML
     private AnchorPane signup_logo_wrap;
@@ -221,13 +268,20 @@ public class Controller {
     private AnchorPane signup_outer;
 
     @FXML
-    private TextField signup_psw_field;
+    private PasswordField signup_psw_field;
+
+    @FXML
+    private ImageView signup_submit_btn;
 
     @FXML
     private TextField signup_usr_field;
 
     @FXML
     private Label signup_wrong_input;
+
+    @FXML
+    private HBox spam_item;
+
 
     public Controller() {
     }
@@ -239,8 +293,8 @@ public class Controller {
     }
 
     @FXML
-    public void signUp() {
-//        new Thread(new signUpThread()).start();
+    public void signUp() throws IOException {
+        new Thread(new signUpThread(new Connection(IPV4, PORT))).start();
     }
 
     @FXML
@@ -405,22 +459,28 @@ public class Controller {
     }
 
     @FXML
-    private void send_new_mail(MouseEvent e) throws IOException {
+    private void send_new_mail(MouseEvent e)
+            throws IOException {
+
         if (e.getSource() == new_msg_send_btn)
             new Thread(new sendMailThread(false, new Connection(IPV4, PORT))).start();
+        else if (e.getSource() == reply_msg_send_btn)
+            new Thread(new sendMailThread(true, new Connection(IPV4, PORT))).start();
         else
             new Thread(new sendMailThread(true, new Connection(IPV4, PORT))).start();
     }
 
     // Reply Box Functions
     @FXML
-    void mailDelete(MouseEvent event) {
-
+    void mailDelete(MouseEvent event) throws IOException {
+        deleteSelectedMail();
     }
 
     @FXML
     void mailForward(MouseEvent event) {
-
+        clearFwdMail();
+        fillFwdMail();
+        showFwdWindow();
     }
 
     @FXML
@@ -455,6 +515,14 @@ public class Controller {
         reply_area.getChildren().remove(1, reply_area.getChildren().size());
     }
 
+    public void clearFwdMail() {
+        fwd_msg_to_datafield.clear();
+        fwd_msg_obj_datafield.clear();
+        fwd_msg_content.clear();
+        fwd_mail_head_desc.setText("");
+        fwd_area.getChildren().remove(1, fwd_area.getChildren().size());
+    }
+
     public void clearSelectedMail() {
         //
         no_selected_mail_wrap.setVisible(false);
@@ -477,6 +545,18 @@ public class Controller {
         Mail act = selectedMail.getPrec();
         while (act != null) {
             reply_area.getChildren().add(new ReplyItem(act));
+            act = act.getPrec();
+        }
+    }
+
+    public void fillFwdMail() {
+        fwd_msg_to_datafield.setText(selectedMail.getSource());
+        fwd_msg_obj_datafield.setText("FWD: " + selectedMail.getObject());
+        fwd_mail_head_desc.setText("FWD: " + selectedMail.getObject());
+        //
+        Mail act = selectedMail.getPrec();
+        while (act != null) {
+            fwd_area.getChildren().add(new ReplyItem(act));
             act = act.getPrec();
         }
     }
@@ -523,6 +603,22 @@ public class Controller {
         animation.play();
     }
 
+    @FXML
+    public void hide_fwd_mail() {
+        Animation animation = new Timeline(
+                new KeyFrame(Duration.millis(100),
+                        new KeyValue(fwd_mail_wrap.opacityProperty(), 0)),
+                new KeyFrame(Duration.millis(150),
+                        new KeyValue(fwd_mail_wrap.translateYProperty(),
+                                main_window.getHeight())),
+                new KeyFrame(Duration.millis(200),
+                        new KeyValue(fwd_mail_window.opacityProperty(), 0)));
+
+        animation.setOnFinished(e -> fwd_mail_window.setVisible(false));
+
+        animation.play();
+    }
+    
     public void showReplyWindow() {
         reply_mail_wrap.translateYProperty().set(main_window.getHeight());
 
@@ -539,8 +635,32 @@ public class Controller {
         animation.play();
     }
 
+    public void showFwdWindow() {
+        fwd_mail_wrap.translateYProperty().set(main_window.getHeight());
+
+        fwd_mail_window.setVisible(true);
+
+        Animation animation = new Timeline(
+                new KeyFrame(Duration.millis(100),
+                        new KeyValue(fwd_mail_window.opacityProperty(), 1)),
+                new KeyFrame(Duration.millis(150),
+                        new KeyValue(fwd_mail_wrap.translateYProperty(), 0)),
+                new KeyFrame(Duration.millis(200),
+                        new KeyValue(fwd_mail_wrap.opacityProperty(), 1)));
+
+        animation.play();
+    }
+
     public void showErrorBtn() {
         errors_btn.setVisible(true);
+    }
+
+    private void hideErrorBtn() {
+        errors_btn.setVisible(false);
+    }
+
+    private void clearErrorList() {
+        error_box_list.getChildren().clear();
     }
 
     @FXML
@@ -698,6 +818,16 @@ public class Controller {
             }
         });
 
+        fwd_msg_content.textProperty().addListener(e -> {
+            if (fwd_msg_content.getText().length() == 0) {
+                fwd_msg_send_btn.setImage(cannot_send);
+                fwd_msg_send_btn.getStyleClass().removeAll("can-send");
+            } else {
+                fwd_msg_send_btn.setImage(can_send);
+                fwd_msg_send_btn.getStyleClass().add("can-send");
+            }
+        });
+
         new_msg_to_datafield.textProperty().addListener(e -> {
             new_msg_to_datafield.getStyleClass().removeAll("new-mail-wrong-to");
         });
@@ -807,6 +937,10 @@ public class Controller {
         @Override
         public void run() {
             try {
+                Platform.runLater(() -> {
+                    clearErrorList();
+                    hideErrorBtn();
+                });
                 getMailboxList();
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
@@ -1011,71 +1145,47 @@ public class Controller {
         private void login() throws IOException {
             String inputUser = login_usr_field.getText();
             String inputPass = login_psw_field.getText();
-            String inputNet = login_net_field.getText();
 
             String res = null;
             boolean passed = false;
-            // regex for NetWork
-            Pattern NeworkPattern = Pattern.compile(NETWORK_PATTERN, Pattern.CASE_INSENSITIVE);
-            Matcher networkMatcher = NeworkPattern.matcher(inputNet);
 
-            if (networkMatcher.find()) {
-                // extracting network info
-                String ipv4addr = inputNet.split(":")[0];
-                String port = inputNet.split(":")[1];
+            Pattern emailPattern = Pattern.compile(EMAIL_PATTERN, Pattern.CASE_INSENSITIVE);
+            Matcher emailMatcher = emailPattern.matcher(inputUser);
 
-                // regex for ipv4
-                Pattern IPV4pattern = Pattern.compile(IPV4_PATTERN, Pattern.CASE_INSENSITIVE);
-                Matcher IPV4matcher = IPV4pattern.matcher(ipv4addr);
-                // regex for port
-                Pattern PORTpattern = Pattern.compile(PORT_PATTERN, Pattern.CASE_INSENSITIVE);
-                Matcher PORTmatcher = PORTpattern.matcher(port);
+            if (emailMatcher.find()) {
+                try {
+                    // Login request
+                    Connection connection = new Connection(IPV4, PORT);
+                    String auth = connection.loginRequest(new Account(inputUser, Security.encryptSHA(inputPass)));
+                    if (auth != null) {
+                        if (auth.equals("AUTH"))
+                            passed = true;
 
-                if (IPV4matcher.find()) {
-                    if (PORTmatcher.find()) {
-                        try {
-                            IPV4 = ipv4addr;
-                            PORT = Integer.parseInt(port);
+                        if (auth.equals("PSW_WRONG"))
+                            res = "Wrong password";
 
-                            // Login request
-                            Connection connection = new Connection(ipv4addr, Integer.parseInt(port));
-                            String auth = connection.loginRequest(new Account(inputUser, Security.encryptSHA(inputPass)));
-                            if (auth != null) {
-                                if (auth.equals("AUTH"))
-                                    passed = true;
-
-                                if (auth.equals("PSW_WRONG"))
-                                    res = "Wrong password";
-
-                                if (auth.equals("USR_WRONG"))
-                                    res = "Username does not exist";
-                            } else {
-                                res = "Error during authentication";
-                            }
-                        } catch (IOException e) {
-                            res = "Server Unreachable";
-                        } catch (ClassNotFoundException e) {
-                            e.printStackTrace();
-                        }
+                        if (auth.equals("USR_WRONG"))
+                            res = "Username does not exist";
                     } else {
-                        res = "Insert a valid port number (1 - 65535)";
+                        res = "Error during authentication";
                     }
-                } else {
-                    res = "Insert a valid IPV4 address (es. 140.123.90.16:1231)";
+                } catch (IOException e) {
+                    res = "Server Unreachable";
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
                 }
             } else
-                res = "Wrong network pattern: <ip_number> : <porn_number>\n(es. 192.168.1.1:1231)";
+                res = "Insert a valid email";
 
             if (passed) {
                 my_acc = new Account(inputUser, Security.encryptSHA(inputPass));
-                head_username.setText(my_acc.getUsername());
+                head_username.setText(my_acc.getUsername().substring(0, my_acc.getUsername().indexOf("@")));
                 login_submit_btn.setManaged(true);
                 hideLoginWindow();
                 new Thread(new refreshMailbox("inbox", new Connection(IPV4, PORT))).start();
                 Thread pUpdate = new Thread(new KeepUpdate());
                 pUpdate.setDaemon(true);
                 pUpdate.start();
-
             } else {
                 assert res != null;
                 hide_login_loader();
@@ -1102,43 +1212,52 @@ public class Controller {
         }
     }
 
-//    public class signUpThread implements Runnable {
-//
-//        @Override
-//        public void run() {
-//            Platform.runLater(() -> {
-//                try {
-//                    signUp();
-//                } catch (ClassNotFoundException e) {
-//                    e.printStackTrace();
-//                }
-//            });
-//        }
-//
-//        private void signUp()
-//                throws ClassNotFoundException {
-//
-//            // Extracting fields
-//            String username = signup_usr_field.getText();
-//            String password = signup_psw_field.getText();
-//
-//            // Regex check
-//            Pattern emailPattern = Pattern.compile(EMAIL_PATTERN, Pattern.CASE_INSENSITIVE);
-//            Matcher emailMatcher = emailPattern.matcher(username);
-//
-//            if (emailMatcher.find()) {
-//                if (password.length() != 0) {
-//                    // Encryption
-//                    password = Security.encryptSHA(password);
-//
-//                    Account new_acc = new Account(username, password);
-//
-//                    String res = connection.signupRequest(new_acc);
-//                }
-//            } else
-//                show_signup_wrong("Wrong Username");
-//        }
-//    }
+    public class signUpThread implements Runnable {
+
+        private Connection connection;
+
+        public signUpThread(Connection connection) {
+            this.connection = connection;
+        }
+
+        @Override
+        public void run() {
+            Platform.runLater(() -> {
+                try {
+                    signUp();
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+
+        private void signUp()
+                throws ClassNotFoundException {
+            // Extracting fields
+            String username = signup_usr_field.getText();
+            String password = signup_psw_field.getText();
+
+            // Regex check
+            Pattern usernamePattern = Pattern.compile(USERNAME_PATTERN, Pattern.CASE_INSENSITIVE);
+            Matcher usernameMatcher = usernamePattern.matcher(username);
+
+            if (usernameMatcher.find()) {
+                username = username + "@unimail.com";
+                if (password.length() != 0) {
+                    // Encryption
+                    password = Security.encryptSHA(password);
+
+                    Account new_acc = new Account(username, password);
+
+                    String res = connection.signupRequest(new_acc);
+                    System.out.println(res);
+                    if (res.equals("REG"))
+                        show_login_section();
+                }
+            } else
+                show_signup_wrong("Wrong Username");
+        }
+    }
 
     public class sendMailThread implements Runnable {
 
@@ -1175,8 +1294,12 @@ public class Controller {
             String object = new_msg_obj_datafield.getText();
 
             String[] splitted = to.split(";");
+            for (String s : splitted) {
+                s.trim();
+            }
 
             ArrayList<String> dests = new ArrayList<>(Arrays.asList(splitted));
+            System.out.println(dests);
 
             // Saving data
             new_mail.setSource(my_acc.getUsername());

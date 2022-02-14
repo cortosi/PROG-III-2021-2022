@@ -1,3 +1,31 @@
-.functionals-wrap{
-    -fx-background-color: black;
+.log-window {
+    -fx-font-family: "SF UI Text";
+}
+
+.functionals-wrap {
+    -fx-background-color: #484848;
+    -fx-padding: 0 20;
+}
+
+.log-area {
+    -fx-control-inner-background: #E4E4E6;
+    -fx-control-inner-border: transparent;
+    -fx-background-insets: 0;
+    -fx-text-fill: #484848;
+    -fx-font-weight: bold;
+    -fx-font-size: 1.1em;
+}
+
+.log-area .content {
+    -fx-background-color: #c2c2c2;
+}
+
+.log-area .text {
+    -fx-line-spacing: 7;
+}
+
+.log-desc {
+    -fx-text-fill: #dcdcdc;
+    -fx-font-size: 2em;
+    -fx-font-weight: bold;
 }
